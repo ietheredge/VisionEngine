@@ -1,4 +1,6 @@
-logs
-models
-reports/figures/panels
-reports/figures/images
+data/
+logs/
+models/
+reports/figures/panels/
+reports/figures/images/
+.ibynb_checkpoints/
