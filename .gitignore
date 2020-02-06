@@ -1,6 +1,10 @@
-data/
-logs/
-models/
+data/raw/
+data/processed/
+logs/train/
+logs/validation/
+models/vlae*/
 reports/figures/panels/
 reports/figures/images/
+notebooks/.ibynb_checkpoints/
 .ibynb_checkpoints/
+.vscode/
