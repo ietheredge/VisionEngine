@@ -2,7 +2,7 @@ data/raw/
 data/processed/
 logs/train/
 logs/validation/
-models/vlae*/
+checkpoints/vlae*/
 reports/figures/panels/
 reports/figures/images/
 notebooks/.ibynb_checkpoints/
