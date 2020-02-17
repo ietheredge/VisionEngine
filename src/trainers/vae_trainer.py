@@ -1,28 +1,63 @@
 """
-Copyright (c) 2019 R. Ian Etheredge All rights reserved.
+Copyright (c) 2020 R. Ian Etheredge All rights reserved.
 
 This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.
 """
-import os
-from keras.callbacks import ModelCheckpoint, TensorBoard, ReduceLROnPlateau
-
-from custom_objects.guppy_ornaments_custom_objects import CapacityIncrease
 from base.base_trainer import BaseTrain
 
-from keras.preprocessing.image import ImageDataGenerator
+import tensorflow as tf
+import numpy as np
+import os
 
 
-class GuppyOrnamentsTrainer(BaseTrain):
+class KLWarmUp(tf.keras.callbacks.Callback):
+    def __init__(self, n_iter=100, start=0.0,
+                 stop=1.0,  n_cycle=4, ratio=0.5, n_latents=4):
+
+        self.frange = self.frange_cycle_linear(n_iter, start=start,
+                                               stop=stop, n_cycle=n_cycle,
+                                               ratio=ratio)
+        self.epoch = 0
+        self.n_latents = n_latents
+
+    def on_epoch_end(self, *args, **kwargs):
+        new_coef = self.frange[self.epoch]
+        self.epoch += 1
+        coefs = [
+            self.model.get_layer(f'z_{i+1}_latent').coef_kl
+            for i in range(self.n_latents)
+                 ]
+
+        for coef in coefs:
+            coef.assign(new_coef)
+
+    @staticmethod
+    def frange_cycle_linear(n_iter, start=0.0, stop=1.0,
+                            n_cycle=4, ratio=0.5):
+        L = np.ones(n_iter) * stop
+        period = n_iter/n_cycle
+        step = (stop-start)/(period*ratio)  # linear schedule
+
+        for c in range(n_cycle):
+            v, i = start, 0
+            while v <= stop and (int(i+c*period) < n_iter):
+                L[int(i+c*period)] = v
+                v += step
+                i += 1
+        return L
+
+
+class VAETrainer(BaseTrain):
     def __init__(self, model, data, config):
-        super(GuppyOrnamentsTrainer, self).__init__(model, data, config)
+        super(VAETrainer, self).__init__(model, data, config)
         self.callbacks = []
         self.loss = []
         self.init_callbacks()
 
     def init_callbacks(self):
         self.callbacks.append(
-            ModelCheckpoint(
+            tf.keras.callbacks.ModelCheckpoint(
                 filepath=os.path.join(self.config.callbacks.checkpoint_dir,
                                       '%s-{epoch:02d}-{loss:.2f}.hdf5' %
                                       self.config.exp.name),
@@ -37,7 +72,7 @@ class GuppyOrnamentsTrainer(BaseTrain):
         )
 
         self.callbacks.append(
-            TensorBoard(
+            tf.keras.callbacks.TensorBoard(
                 log_dir=self.config.callbacks.tensorboard_log_dir,
                 write_graph=self.config.callbacks.tensorboard_write_graph,
                 write_images=self.config.callbacks.tensorboard_write_images,
@@ -45,91 +80,46 @@ class GuppyOrnamentsTrainer(BaseTrain):
             )
         )
 
-        # use a callback to controll the bottleneck capacity
+        lr_epochs = np.linspace(
+            self.config.trainer.lr_start,
+            self.config.trainer.lr_stop,
+            self.config.trainer.num_epochs
+            )
+
         self.callbacks.append(
-            CapacityIncrease(
-                max_capacity=self.config.model.max_capacity,
-                max_epochs=self.config.model.max_epochs,
+            tf.keras.callbacks.LearningRateScheduler(
+                lambda i: lr_epochs[i]
             )
         )
 
-        # reduce the learning rate on plateau
         self.callbacks.append(
-            ReduceLROnPlateau(monitor='loss',
-                              factor=self.config.trainer.decay_factor,
-                              mode='min',
-                              patience=self.config.trainer.patience,
-                              min_lr=1e-010)
+            tf.keras.callbacks.EarlyStopping(
+                min_delta=self.config.trainer.min_delta,
+                patience=self.config.trainer.patience
         )
 
+        if self.config.trainer.use_kl_warmup is True:
+            self.callbacks.append(
+                KLWarmUp(
+                    n_iter=self.config.trainer.kl_wu_n_iter,
+                    start=self.config.trainer.kl_wu_start,
+                    stop=self.config.trainer.kl_wu_stop,
+                    n_cycle=self.config.trainer.kl_wu_n_cycle,
+                    ratio=self.config.trainer.kl_wu_ratio,
+                    n_latents=self.config.model.n_latents
+                 )
+            )
+
     def train(self):
-        if self.config.model.use_tc_discriminator is True:
-            raise NotImplementedError
-            # if self.config.dataset.aug is True:
-            #     shift = self.config.dataset.aug_shift
-            #     rotation_range = self.config.dataset.aug_rotation
-            #     self.datagen = ImageDataGenerator(
-            #         width_shift_range=shift,
-            #         height_shift_range=shift,
-            #         horizontal_flip=True,
-            #         vertical_flip=True,
-            #         rotation_range=rotation_range
-            #         )
+        history = self.model.fit(
+            self.data[0], self.data[0],
+            epochs=self.config.trainer.num_epochs,
+            verbose=self.config.trainer.verbose_training,
+            batch_size=self.config.trainer.batch_size,
+            validation_split=self.config.trainer.validation_split,
+            shuffle=self.config.trainer.shuffle,
+            callbacks=self.callbacks,
+        )
 
-            #     self.datagen.fit(self.data[0])
-
-            #     history = self.model.fit_generator(
-            #         self.datagen.flow(
-            #             self.data[0],
-            #             self.data[0],
-            #             batch_size=self.config.trainer.batch_size
-            #             ),
-            #         epochs=self.config.trainer.num_epochs,
-            #         verbose=self.config.trainer.verbose_training,
-            #         shuffle=self.config.trainer.shuffle,
-            #         steps_per_epoch=len(self.data[0])/self.config.trainer.batch_size,
-            #         callbacks=self.callbacks,
-            #     )
-            # else:
-
-        else:
-            if self.config.dataset.aug is True:
-                shift = self.config.dataset.aug_shift
-                rotation_range = self.config.dataset.aug_rotation
-                self.datagen = ImageDataGenerator(
-                    width_shift_range=shift,
-                    height_shift_range=shift,
-                    horizontal_flip=True,
-                    vertical_flip=True,
-                    rotation_range=rotation_range
-                    )
-
-                self.datagen.fit(self.data[0])
-
-                history = self.model.fit_generator(
-                    self.datagen.flow(
-                        self.data[0],
-                        self.data[0],
-                        batch_size=self.config.trainer.batch_size,
-                        # save_to_dir=self.config.dataset.aug_dir,
-                        ),
-                    epochs=self.config.trainer.num_epochs,
-                    verbose=self.config.trainer.verbose_training,
-                    shuffle=self.config.trainer.shuffle,
-                    steps_per_epoch=len(self.data[0])/self.config.trainer.batch_size,
-                    use_multiprocessing=True,
-                    callbacks=self.callbacks,
-                )
-            else:
-                history = self.model.fit(
-                    self.data[0], self.data[0],
-                    epochs=self.config.trainer.num_epochs,
-                    verbose=self.config.trainer.verbose_training,
-                    batch_size=self.config.trainer.batch_size,
-                    validation_split=self.config.trainer.validation_split,
-                    shuffle=self.config.trainer.shuffle,
-                    callbacks=self.callbacks,
-                )
-    
-        for metric in self.config.callbacks.callback_metrics:
-            self.loss.extend(history.history[metric])
+    for metric in self.config.callbacks.callback_metrics:
+        self.loss.extend(history.history[metric])

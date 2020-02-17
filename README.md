@@ -18,12 +18,9 @@ Start training with a config file from 'configs/', e.g. python main.py -c config
 ├── logs
 ├── notebooks
 │   ├── ColorPatternSpace.ipynb
-│   ├── DRAFTColorPatternSpace_Flows-Copy1.ipynb
-│   ├── DRAFTColorPatternSpace_Flows.ipynb
 │   ├── GANotebook.ipynb
 │   ├── Generator.ipynb
-│   ├── SuperResolution.ipynb
-│   └── TorchVAEFlows.ipynb
+│   └── SuperResolution.ipynb
 ├── README.md
 ├── report
 │   └── figures

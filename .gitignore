@@ -1,10 +1,12 @@
-data/raw/
-data/processed/
+data/raw/*.npz
+data/processed/*.npy
 logs/train/
 logs/validation/
-checkpoints/vlae*/
+checkpoints/
 reports/figures/panels/
 reports/figures/images/
+report/figures/movies/
 notebooks/.ibynb_checkpoints/
 .ibynb_checkpoints/
 .vscode/
+VisionEngine.egg-info/

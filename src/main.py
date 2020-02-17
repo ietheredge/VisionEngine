@@ -13,8 +13,9 @@ def main():
         config = process_config(args.config)
 
         # create the experiments dirs
-        create_dirs([config.callbacks.tensorboard_log_dir,
-                        config.callbacks.checkpoint_dir])
+        create_dirs([
+            config.callbacks.tensorboard_log_dir,
+            config.callbacks.checkpoint_dir])
 
         print('Create the data generator.')
         data_loader = factory.create(
