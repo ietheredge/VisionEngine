@@ -6,7 +6,7 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 """
 from base.base_data_loader import BaseDataLoader
 
-from VisionEngine.data.raw import guppies
+from VisionEngine.data.datasets import guppies
 
 
 class GuppiesDataLoader(BaseDataLoader):

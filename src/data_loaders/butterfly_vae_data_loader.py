@@ -6,7 +6,7 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 """
 from base.base_data_loader import BaseDataLoader
 
-from datasets import butterflies, generated_butterflies
+from VisionEngine.datasets import butterflies, generated_butterflies
 import numpy as np
 
 

@@ -3,10 +3,12 @@ data/processed/*.npy
 logs/train/
 logs/validation/
 checkpoints/
-reports/figures/panels/
-reports/figures/images/
+report/figures/panels/
+report/figures/images/
 report/figures/movies/
 notebooks/.ibynb_checkpoints/
 .ibynb_checkpoints/
 .vscode/
 VisionEngine.egg-info/
+src/data_loaders/datasets/*.npz
+*.pyc

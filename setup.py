@@ -9,11 +9,10 @@ setup(
     author='R. Ian Etherdge',
     author_email='ietheredge@ab.mpg.de',
     license='MIT',
-    packages=['VisionEngine', 'VisionEngine.data', 'VisionEngine.checkpoints'],
+    packages=['VisionEngine', 'VisionEngine.datasets'],
     zip_safe=False,
     package_dir={
         'VisionEngine': 'src',
-        'VisionEngine.data': 'data',
-        'VisionEngine.checkpoints': 'checkpoints',
+        'VisionEngine.datasets': 'src/data/datasets',
         }
 )

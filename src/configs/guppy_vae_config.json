@@ -4,6 +4,7 @@
     },
     "data_loader": {
       "name": "guppy_vae_data_loader.GuppyDataLoader",
+      "folder_loc": "../../data/raw",
       "use_generated": true
     },
     "model":{
