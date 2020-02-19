@@ -22,7 +22,7 @@ If you do not want to install VisionEngine locally, feel free to run the provide
 The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch, the required datasets will be automatically downloaded via the dataloaders, you do not need to do this yourself. Any missing data files required for Jupyter Notebooks will be downloaded automatically via the dataloaders. 
 
 # Training a model from scratch
-To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs') run, e.g.: 
+To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
 ```bash
 python main.py -c configs/guppy_vae_config.json
 ```
