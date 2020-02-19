@@ -5,24 +5,24 @@
 Welcome to the repository for the framework presented in VISIONENGINE, INVESTIGATING NATURAL COLOR-PATTERNS WITH MACHINE LEARNING. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
 
 # Getting setup
-We recommend creating a virtual environment to run VisionEngine, e.g. [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
+We recommend creating a virtual environment to run VisionEngine using [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
 
 Once Anaconda is installed, run:
 ```bash
 conda env -n VisionEngine tensorflow-gpu
-conda activate VisionEngine
 ```
-Then, to install VisionEngine, run: 
-```bash 
+Then, to get VisionEngine, run: 
+```bash
+conda activate VisionEngine
 git clone https://github.com/ietheredge/VisionEngine
 cd VisionEngine
 conda install --yes --file requirements.txt
 python setup.py install
 ```
-If you do not want to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link provided at the top of each notebook.
+If you do not wish to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link at the top of each notebook.
 
 # Raw data availability
-The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch and using the provided notebook the required datasets will be automatically downloaded via the dataloaders, so you do not need to do this yourself.
+The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch and using the provided notebook the required datasets will be automatically downloaded via the dataloaders, so you do not need to do anything.
 
 # Training a model from scratch
 To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
