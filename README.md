@@ -1,7 +1,7 @@
 # VisionEngine
 Code repository for the framework presented in VISIONENGINE, INVESTIGATING NATURAL COLOR-PATTERNS WITH MACHINE LEARNING. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
 
-![demo](https://github.com/ietheredge/VisionEngine/tree/master/report/figures/VisionEngine.gif)
+![](https://github.com/ietheredge/VisionEngine/tree/master/report/figures/VisionEngine.gif?token=AAVPH53MQ6DZ7FIT5WQLQM26K2S32)
 
 # Getting setup
 We recommend creating a virtual environment to run VisionEngine, e.g. [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
