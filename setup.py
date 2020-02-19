@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='VisionEngine',
-    version='0.1',
+    version='0.1a',
     description='VisionEngine is a machine learning framework for analyzing \
         natural color patterns',
     url='http://github.com/ietheredge/VisionEngine',
@@ -12,7 +12,7 @@ setup(
     packages=['VisionEngine', 'VisionEngine.datasets'],
     zip_safe=False,
     package_dir={
-        'VisionEngine': 'src',
-        'VisionEngine.datasets': 'src/data/datasets',
+        'VisionEngine': 'VisionEngine',
+        'VisionEngine.datasets': 'VisionEngine/data_loaders/datasets',
         }
 )
