@@ -1,8 +1,5 @@
-<div align=“center”>
-<div markdown=“1”>
+
 ![](../assets/VisionEngine.gif?raw=true)
-</div>
-</div>
 
 # VisionEngine
 Code repository for the framework presented in VISIONENGINE, INVESTIGATING NATURAL COLOR-PATTERNS WITH MACHINE LEARNING. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
