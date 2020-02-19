@@ -1,7 +1,11 @@
+<div align=“center”>
+<div markdown=“1”>
+![](../assets/VisionEngine.gif?raw=true)
+</div>
+</div>
+
 # VisionEngine
 Code repository for the framework presented in VISIONENGINE, INVESTIGATING NATURAL COLOR-PATTERNS WITH MACHINE LEARNING. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
-
-![](../assets/VisionEngine.gif?raw=true)
 
 # Getting setup
 We recommend creating a virtual environment to run VisionEngine, e.g. [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
@@ -21,7 +25,7 @@ python setup.py install
 If you do not want to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link provided at the top of each notebook.
 
 # Raw data availability
-The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch, the required datasets will be automatically downloaded via the dataloaders, you do not need to do this yourself. Any missing data files required for Jupyter Notebooks will be downloaded automatically via the dataloaders. 
+The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch and using the provided notebook the required datasets will be automatically downloaded via the dataloaders, so you do not need to do this yourself.
 
 # Training a model from scratch
 To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
