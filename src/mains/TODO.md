@@ -1,1 +1,0 @@
-**Collapse all mains into single shared main (using the factory, confgis, etc. to set things up)**
