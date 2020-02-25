@@ -1,11 +1,12 @@
 logs/
 checkpoints/
-notebooks/.ibynb_checkpoints/
+notebooks/.ibynb_checkpoints
 .ibynb_checkpoints/
 .vscode/
 VisionEngine.egg-info/
 VisionEngine/data_loaders/datasets/*.npz
 *.pyc
 dist/
+build/
 data/processed/parent_record_Fig2c.npy
 VisionEngine/models/vae_modelDRAFT2.py
