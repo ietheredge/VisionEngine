@@ -16,7 +16,7 @@ def main():
         create_dirs([
             config.callbacks.tensorboard_log_dir,
             config.callbacks.checkpoint_dir,
-            config.trainer.transormed_dir])
+            ])
 
         print('Create the data generator.')
         data_loader = factory.create(
