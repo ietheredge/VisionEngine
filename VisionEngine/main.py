@@ -15,21 +15,22 @@ def main():
         # create the experiments dirs
         create_dirs([
             config.callbacks.tensorboard_log_dir,
-            config.callbacks.checkpoint_dir])
+            config.callbacks.checkpoint_dir,
+            config.trainer.transormed_dir])
 
         print('Create the data generator.')
         data_loader = factory.create(
-            "data_loaders."+config.data_loader.name
+            "VisionEngine.data_loaders."+config.data_loader.name
             )(config)
 
         print('Create the model.')
         model = factory.create(
-            "models."+config.model.name
+            "VisionEngine.models."+config.model.name
             )(config)
 
         print('Create the trainer')
         trainer = factory.create(
-            "trainers."+config.trainer.name
+            "VisionEngine.trainers."+config.trainer.name
             )(model.model, data_loader.get_train_data(), config)
 
         print('Start training the model.')

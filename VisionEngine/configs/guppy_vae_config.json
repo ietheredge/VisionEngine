@@ -4,8 +4,8 @@
     },
     "data_loader": {
       "name": "guppy_vae_data_loader.GuppyDataLoader",
-      "folder_loc": "../../data/raw",
-      "use_generated": true
+      "use_generated": false,
+      "folder_loc": "../../data/raw"
     },
     "model":{
       "name": "vae_model.VAEModel",
@@ -19,8 +19,8 @@
       "recon_loss_weight": 0.5,
       "use_perceptual_loss": false,
       "perceptual_loss_model": "vgg",
-      "pereceptual_loss_layers": [2, 2],
-      "perceptual_loss_layer_weights": [1, 1],
+      "pereceptual_loss_layers": [2, 5, 9, 13],
+      "perceptual_loss_layer_weights": [1, 1, 1, 1],
       "mu_prior": 0.0,
       "sigma_prior": 1.0,
       "use_mmd": true,

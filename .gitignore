@@ -10,3 +10,4 @@ dist/
 build/
 data/processed/parent_record_Fig2c.npy
 VisionEngine/models/vae_modelDRAFT2.py
+data/interim

@@ -4,7 +4,7 @@ Copyright (c) 2020 R. Ian Etheredge All rights reserved.
 This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.
 """
-from base.base_data_loader import BaseDataLoader
+from VisionEngine.base.base_data_loader import BaseDataLoader
 
 from VisionEngine.datasets import guppies, generated_guppies
 import numpy as np

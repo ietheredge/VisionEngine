@@ -1,4 +1,10 @@
-from base.base_model import BaseModel
+"""
+Copyright (c) 2020 R. Ian Etheredge All rights reserved.
+
+This work is licensed under the terms of the MIT license.
+For a copy, see <https://opensource.org/licenses/MIT>.
+"""
+from VisionEngine.base.base_model import BaseModel
 
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -419,45 +425,46 @@ class VAEModel(Encoder, Decoder):
 
         self.inputs = tf.keras.layers.Input(self.config.model.input_shape)
         h_1, h_2, h_3, h_4 = self.encoder(self.inputs)
-        self.z_1 = NormalVariational(
-            size=self.config.model.latent_size,
-            mu_prior=self.config.model.mu_prior,
-            sigma_prior=self.config.model.sigma_prior,
-            use_kl=self.config.model.use_kl,
-            kl_coef=self.config.model.kl_coef,
-            use_mmd=self.config.model.use_mmd,
-            mmd_coef=self.config.model.mmd_coef,
-            name='z_1_latent')(h_1)
-
-        self.z_2 = NormalVariational(
-            size=self.config.model.latent_size,
-            mu_prior=self.config.model.mu_prior,
-            sigma_prior=self.config.model.sigma_prior,
-            use_kl=self.config.model.use_kl,
-            kl_coef=self.config.model.kl_coef,
-            use_mmd=self.config.model.use_mmd,
-            mmd_coef=self.config.model.mmd_coef,
-            name='z_2_latent')(h_2)
-
-        self.z_3 = NormalVariational(
-            size=self.config.model.latent_size,
-            mu_prior=self.config.model.mu_prior,
-            sigma_prior=self.config.model.sigma_prior,
-            use_kl=self.config.model.use_kl,
-            kl_coef=self.config.model.kl_coef,
-            use_mmd=self.config.model.use_mmd,
-            mmd_coef=self.config.model.mmd_coef,
-            name='z_3_latent')(h_3)
-
-        self.z_4 = NormalVariational(
-            size=self.config.model.latent_size,
-            mu_prior=self.config.model.mu_prior,
-            sigma_prior=self.config.model.sigma_prior,
-            use_kl=self.config.model.use_kl,
-            kl_coef=self.config.model.kl_coef,
-            use_mmd=self.config.model.use_mmd,
-            mmd_coef=self.config.model.mmd_coef,
-            name='z_4_latent')(h_4)
+        with tf.name_scope('z_1_latent'):
+            self.z_1 = NormalVariational(
+                size=self.config.model.latent_size,
+                mu_prior=self.config.model.mu_prior,
+                sigma_prior=self.config.model.sigma_prior,
+                use_kl=self.config.model.use_kl,
+                kl_coef=self.config.model.kl_coef,
+                use_mmd=self.config.model.use_mmd,
+                mmd_coef=self.config.model.mmd_coef,
+                name='z_1_latent')(h_1)
+        with tf.name_scope('z_2_latent'):
+            self.z_2 = NormalVariational(
+                size=self.config.model.latent_size,
+                mu_prior=self.config.model.mu_prior,
+                sigma_prior=self.config.model.sigma_prior,
+                use_kl=self.config.model.use_kl,
+                kl_coef=self.config.model.kl_coef,
+                use_mmd=self.config.model.use_mmd,
+                mmd_coef=self.config.model.mmd_coef,
+                name='z_2_latent')(h_2)
+        with tf.name_scope('z_3_latent'):
+            self.z_3 = NormalVariational(
+                size=self.config.model.latent_size,
+                mu_prior=self.config.model.mu_prior,
+                sigma_prior=self.config.model.sigma_prior,
+                use_kl=self.config.model.use_kl,
+                kl_coef=self.config.model.kl_coef,
+                use_mmd=self.config.model.use_mmd,
+                mmd_coef=self.config.model.mmd_coef,
+                name='z_3_latent')(h_3)
+        with tf.name_scope('z_4_latent'):
+            self.z_4 = NormalVariational(
+                size=self.config.model.latent_size,
+                mu_prior=self.config.model.mu_prior,
+                sigma_prior=self.config.model.sigma_prior,
+                use_kl=self.config.model.use_kl,
+                kl_coef=self.config.model.kl_coef,
+                use_mmd=self.config.model.use_mmd,
+                mmd_coef=self.config.model.mmd_coef,
+                name='z_4_latent')(h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
 
@@ -470,13 +477,13 @@ class VAEModel(Encoder, Decoder):
             raise Exception("You need to build the model first.")
 
         print("Loading model checkpoint {} ...\n".format(checkpoint_path))
-        self.model.load_model(
+        self.model.load_weights(
             checkpoint_path,
-            custom_objects={'NormalVariational':
-                            NormalVariational,
-                            'SaltAndPepper':
-                            SaltAndPepper,
-                            }
+            # custom_objects={'NormalVariational':
+            #                 NormalVariational,
+            #                 'SaltAndPepper':
+            #                 SaltAndPepper,
+            #                 }
             )
 
         print("Model loaded")
