@@ -3,6 +3,7 @@ from utils.dirs import create_dirs
 from utils.args import get_args
 from utils import factory
 import sys
+import tensorflow
 
 
 def main():
@@ -12,11 +13,12 @@ def main():
         args = get_args()
         config = process_config(args.config)
 
+        
         # create the experiments dirs
         create_dirs([
             config.callbacks.tensorboard_log_dir,
             config.callbacks.checkpoint_dir,
-            config.trainer.transormed_dir])
+            ])
 
         print('Create the data generator.')
         data_loader = factory.create(

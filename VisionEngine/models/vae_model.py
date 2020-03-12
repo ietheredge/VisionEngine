@@ -11,6 +11,79 @@ import tensorflow_probability as tfp
 import numpy as np
 
 
+class PerceptualLossLayer(tf.keras.layers.Layer):
+    def __init__(self, perceptual_loss_model,
+                 pereceptual_loss_layers, perceptual_loss_layer_weights,
+                 model_input_shape, name, **kwargs):
+        super(PerceptualLossLayer, self).__init__(**kwargs)
+        self.loss_model_type = perceptual_loss_model
+        self.layers = pereceptual_loss_layers
+        self.layer_weights = perceptual_loss_layer_weights
+        self.model_input_shape = [256, 256, 3]
+
+    def build(self, input_shape):
+        if self.loss_model_type == 'vgg':
+            self.loss_model_ = tf.keras.applications.VGG16(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.model_input_shape
+                )
+            self.loss_model_.trainable = False
+
+            for layer in self.loss_model_.layers:
+                layer.trainable = False
+
+            self.loss_layers = [
+                tf.keras.layers.BatchNormalization()(self.loss_model_.layers[i].output)
+                for i in self.layers
+                ]
+
+            self.loss_model = tf.keras.Model(
+                self.loss_model_.inputs,
+                self.loss_layers,
+                )
+        else:
+            raise NotImplementedError
+        super(PerceptualLossLayer, self).build(input_shape)
+
+    def call(self, layer_inputs, **kwargs):
+        y_true = layer_inputs[0]
+        y_pred = layer_inputs[1]
+
+        self.sample_ = self.loss_model(y_true)
+        self.reconstruction_ = self.loss_model(y_pred)
+
+        self.perceptual_loss = 0.
+        for i in range(len(self.reconstruction_)):
+            shape = tf.cast(tf.shape(self.reconstruction_[i]), dtype='float32')
+            self.perceptual_loss += tf.math.reduce_mean(
+                self.layer_weights[i] *
+                (tf.math.reduce_sum(tf.math.square(self.sample_[i] - self.reconstruction_[i])) /
+                    (shape[-1] * shape[1] * shape[1]))
+            )
+
+        perceptual_loss = tf.cast(self.perceptual_loss, dtype='float32')
+        self.add_loss(perceptual_loss)
+        self.add_metric(perceptual_loss, 'mean', 'perceptual_loss')
+
+        return [y_true, y_pred]
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
+    def get_config(self):
+        config = {
+            'perceptual_loss_model': self.loss_model_type,
+            'pereceptual_loss_layers': self.layers,
+            'perceptual_loss_layer_weights':
+                self.layer_weights,
+            'model_input_shape': self.model_input_shape,
+        }
+        base_config = \
+            super(PerceptualLossLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
 class NormalVariational(tf.keras.layers.Layer):
     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
                  use_kl=False, kl_coef=1.0,
@@ -44,12 +117,13 @@ class NormalVariational(tf.keras.layers.Layer):
 
     def use_kl_divergence(self, q_mu, q_sigma, p_mu, p_sigma):
         r = q_mu - p_mu
-        kl = tf.reduce_mean(
-            self.kl_coef * tf.reduce_sum(
+        kl = self.kl_coef * tf.reduce_mean(
+            tf.reduce_sum(
                 tf.math.log(p_sigma) -
                 tf.math.log(q_sigma) -
-                .5 * (1. - (q_sigma**2 + r**2) / p_sigma**2), axis=1)
+                .5 * (1. - (q_sigma**2 + r**2) / p_sigma**2), axis=1
                 )
+            )
 
         self.add_loss(kl)
         self.add_metric(kl, 'mean', 'kl_divergence')
@@ -124,7 +198,7 @@ class SaltAndPepper(tf.keras.layers.Layer):
             return out
 
         return tf.keras.backend.in_train_phase(
-            noised(), inputs, training=training)
+            noised, inputs, training=training)
 
     def get_config(self):
         config = {'ratio': self.ratio,
@@ -144,13 +218,14 @@ class Encoder(BaseModel):
             self.encoder_inputs = tf.keras.layers.Input(
                 shape=self.config.model.input_shape, name='input')
 
-            with tf.name_scope('noise_layer'):
-                noise_layers = tf.keras.Sequential([
-                    SaltAndPepper(),
-                    tf.keras.layers.GaussianNoise(self.config.model.noise_ratio)
-                    ], name='noise_layer')
+            if self.config.modeul.denoise is True:
+                with tf.name_scope('noise_layer'):
+                    noise_layers = tf.keras.Sequential([
+                        SaltAndPepper(),
+                        tf.keras.layers.GaussianNoise(self.config.model.noise_ratio)
+                        ], name='noise_layer')
 
-                noisy_inputs = noise_layers(self.encoder_inputs)
+                    noisy_inputs = noise_layers(self.encoder_inputs)
 
             with tf.name_scope('z_1'):
                 h_1_layers = tf.keras.Sequential([
@@ -172,7 +247,10 @@ class Encoder(BaseModel):
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.LeakyReLU()], name='h_1')
 
-                h_1 = h_1_layers(noisy_inputs)
+                if self.config.modeul.denoise is True:
+                    h_1 = h_1_layers(noisy_inputs)
+                else:
+                    h_1 = h_1_layers(self.encoder_inputs)
                 h_1_flatten = tf.keras.layers.Flatten()(h_1)
 
             with tf.name_scope('z_2'):
@@ -390,14 +468,14 @@ class Decoder(BaseModel):
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.Conv2DTranspose(
-                        3, 4, 1, padding='same',
+                        self.config.model.input_shape[2], 4, 1, padding='same',
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.Activation('sigmoid')], name='z_tilde_1')
 
                 input_z_tilde_1 = tf.keras.layers.Concatenate()([z_tilde_2, z_1])
-                
+
                 self.decoder_outputs = z_tilde_1_layers(input_z_tilde_1)
                 self.decoder_inputs = [
                     self.z_1_input, self.z_2_input, self.z_3_input, self.z_4_input
@@ -416,15 +494,15 @@ class VAEModel(Encoder, Decoder):
 
     def make_model(self):
 
-        def custom_loss(x, xhat):
-            return self.config.model.recon_loss_weight * \
-                tf.losses.mean_squared_error(
+        def weighted_reconstruction_loss(x, xhat):
+            return self.config.model.recon_loss_weight \
+                * tf.losses.mean_squared_error(
                     tf.keras.layers.Flatten()(x),
                     tf.keras.layers.Flatten()(xhat)) \
                 * np.prod(self.config.model.input_shape)
 
         self.inputs = tf.keras.layers.Input(self.config.model.input_shape)
-        h_1, h_2, h_3, h_4 = self.encoder(self.inputs)
+        self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(self.inputs)
         with tf.name_scope('z_1_latent'):
             self.z_1 = NormalVariational(
                 size=self.config.model.latent_size,
@@ -434,7 +512,8 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
-                name='z_1_latent')(h_1)
+                name='z_1_latent')(self.h_1)
+
         with tf.name_scope('z_2_latent'):
             self.z_2 = NormalVariational(
                 size=self.config.model.latent_size,
@@ -444,7 +523,8 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
-                name='z_2_latent')(h_2)
+                name='z_2_latent')(self.h_2)
+
         with tf.name_scope('z_3_latent'):
             self.z_3 = NormalVariational(
                 size=self.config.model.latent_size,
@@ -454,7 +534,8 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
-                name='z_3_latent')(h_3)
+                name='z_3_latent')(self.h_3)
+
         with tf.name_scope('z_4_latent'):
             self.z_4 = NormalVariational(
                 size=self.config.model.latent_size,
@@ -464,26 +545,26 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
-                name='z_4_latent')(h_4)
+                name='z_4_latent')(self.h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
+        if self.config.model.use_perceptual_loss is True:
+            with tf.name_scope('perceptual_loss'):
+                (_ , self.outputs) = PerceptualLossLayer(
+                    perceptual_loss_model=self.config.model.perceptual_loss_model,
+                    pereceptual_loss_layers=self.config.model.pereceptual_loss_layers,
+                    perceptual_loss_layer_weights=self.config.model.perceptual_loss_layer_weights,
+                    model_input_shape=self.config.model.input_shape,
+                    name='perceptual_loss_layer')([self.inputs, self.outputs])
 
         self.model = tf.keras.Model(self.inputs, self.outputs, name='vlae')
         self.model.summary()
-        self.model.compile(tf.keras.optimizers.Adam(), custom_loss)
+        self.model.compile(tf.keras.optimizers.Adam(), weighted_reconstruction_loss)
 
     def load(self, checkpoint_path):
         if self.model is None:
             raise Exception("You need to build the model first.")
 
         print("Loading model checkpoint {} ...\n".format(checkpoint_path))
-        self.model.load_weights(
-            checkpoint_path,
-            # custom_objects={'NormalVariational':
-            #                 NormalVariational,
-            #                 'SaltAndPepper':
-            #                 SaltAndPepper,
-            #                 }
-            )
-
+        self.model.load_weights(checkpoint_path)
         print("Model loaded")

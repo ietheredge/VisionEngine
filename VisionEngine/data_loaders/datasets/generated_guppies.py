@@ -10,10 +10,10 @@ def load_data(path='generated_guppies.npz'):
     path = get_file(path,
                     origin=origin_folder,
                     cache_subdir='datasets',
-                    cache_dir='data_loaders',
-                    file_hash='a0b0c9fb2b641b07cc4e69b264638fa1f855d6602436b119d12e9950144e9f3d')
+                    cache_dir='VisionEngine/data_loaders/',
+                    hash_algorithm='sha256',
+                    file_hash='b27e2fbbf67399aa2ba4b2dbaebce5a6318f9ec03bc023299ec95df82b7c0ab2')
     with np.load(path) as f:
-        x_train, y_train = f['x_train'], f['y_train']
-        # x_test, y_test = f['x_test'], f['y_test']
+        X, y = f['X'].astype('uint8'), f['y'].astype('str')
 
-    return (x_train, y_train), (None, None)
+    return (X, y), (None, None)

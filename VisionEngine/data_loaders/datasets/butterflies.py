@@ -10,8 +10,8 @@ def load_data(path='butterflies.npz'):
     path = get_file(path,
                     origin=origin_folder,
                     cache_subdir='datasets',
-                    cache_dir='data_loaders',
-                    file_hash='8a61469f7ea1b54cbae51d4f78837e458a61469f7ea1b54cbae51d4f78837e45')
+                    cache_dir='VisionEngine/data_loaders/',
+                    file_hash='cbdd51b4c006af3736603d3441f48261785476d850ccbb3ebf895a1534d0764d')
     with np.load(path) as f:
         x_train, y_train = f['x_train'], f['y_train']
         # x_test, y_test = f['x_test'], f['y_test']

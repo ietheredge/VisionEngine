@@ -114,10 +114,13 @@ class VAETrainer(BaseTrain):
             )
 
     def train(self):
-        self.model.fit(
-            self.data[0], self.data[0],
-            validation_split=self.config.trainer.validation_split,
-            batch_size=self.config.trainer.batch_size,
-            epochs=self.config.trainer.num_epochs,
-            callbacks=self.callbacks,
+        self.model.fit_generator(self.data,
+                epochs=self.config.trainer.num_epochs,
+                callbacks=self.callbacks,
+                steps_per_epoch=int(self.config.data_loader.n_samples/self.config.trainer.batch_size)+1,
+                )
+        self.model.save_weights(
+            os.path.join(
+                self.config.callbacks.checkpoint_dir,
+                '%s-{epoch:02d}-{loss:.2f}.hdf50' % self.config.exp.name)
         )

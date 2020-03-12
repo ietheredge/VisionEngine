@@ -1,10 +1,14 @@
 {
     "exp": {
-      "name": "butterfly_vae"
+      "name": "butterfly_vae_real_4"
     },
     "data_loader": {
       "name": "butterfly_vae_data_loader.ButterflyDataLoader",
-      "use_generated": true
+      "use_generated": true,
+      "use_real": true,
+      "folder_loc": "../../data/raw",
+      "n_samples": 9216,
+      "cache": true
     },
     "model":{
       "name": "vae_model.VAEModel",
@@ -16,28 +20,29 @@
       "latent_size": 10,
       "optimizer": "adam",
       "recon_loss_weight": 0.5,
-      "use_perceptual_loss": false,
+      "use_perceptual_loss": true,
       "perceptual_loss_model": "vgg",
-      "pereceptual_loss_layers": [2, 2],
-      "perceptual_loss_layer_weights": [1, 1],
+      "pereceptual_loss_layers": [2, 5, 9, 13],
+      "perceptual_loss_layer_weights": [10, 10, 10, 10],
       "mu_prior": 0.0,
       "sigma_prior": 1.0,
       "use_mmd": true,
       "mmd_coef": 5000.0,
       "use_kl": false,
-      "kl_coef": 1.0,
+      "kl_coef": 1000.0,
       "kernel_l2_regularize": 2.5e-5,
       "kernel_rnorm_init": 0.02
     },
     "trainer":{
-      "name": "guppy_ornaments_trainer.GuppyOrnamentsTrainer",
+      "name": "vae_trainer.VAETrainer",
       "verbose_training": true,
-      "batch_size": 20,
-      "validation_split": 0.05,
-      "num_epochs": 500,
-      "shuffle": true,
-      "lr_start": 10e-5,
-      "lr_end": 10e-8,
+      "batch_size": 10,
+      "validation_split": 0.01,
+      "num_epochs": 1000,
+      "shuffle": false,
+      "use_lr_scheduler": true,
+      "lr_start": -5,
+      "lr_stop": -11,
       "min_delta": 0.0001,
       "patience": 15,
       "use_kl_warmup": false,
@@ -48,15 +53,17 @@
       "kl_wu_n_iter": 500
     },
     "callbacks":{
-      "callback_metrics": ["loss", "val_loss", "mmd_discrepancy"],
-      "checkpoint_monitor": "val_loss",
+      "checkpoint_monitor": "loss",
       "checkpoint_mode": "auto",
       "checkpoint_save_best_only": true,
       "checkpoint_save_weights_only": true,
       "checkpoint_verbose": true,
-      "tb_logid": "../checkpoints",
-      "tb_write_graph": false,
-      "tb_write_images": false,
-      "tb_historgram_freq": 25
+      "checkpoint_dir": "/mnt/jordanlab/People/ietheredge/VisionEngine/checkpoints",
+      "save_freq": 10000,
+      "use_early_stopping": false,
+      "tensorboard_write_graph": true,
+      "tensorboard_write_images": false,
+      "tensorboard_historgram_freq": 1000,
+      "tensorboard_log_dir": "logs/butterfly_vae"
     }
   }
