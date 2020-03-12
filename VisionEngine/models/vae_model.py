@@ -557,6 +557,16 @@ class VAEModel(Encoder, Decoder):
                     model_input_shape=self.config.model.input_shape,
                     name='perceptual_loss_layer')([self.inputs, self.outputs])
 
+        if self.config.model.use_perceptual_loss is True:
+            with tf.name_scope('perceptual_loss'):
+                (_, self.outputs) = PerceptualLossLayer(
+                    perceptual_loss_model=self.config.model.perceptual_loss_model,
+                    pereceptual_loss_layers=self.config.model.pereceptual_loss_layers,
+                    perceptual_loss_layer_weights=self.config.model.perceptual_loss_layer_weights,
+                    model_input_shape=self.config.model.input_shape,
+                    name='perceptual_loss_layer')([self.inputs, self.outputs])
+                 
+
         self.model = tf.keras.Model(self.inputs, self.outputs, name='vlae')
         self.model.summary()
         self.model.compile(tf.keras.optimizers.Adam(), weighted_reconstruction_loss)
