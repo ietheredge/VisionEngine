@@ -122,7 +122,7 @@ class GuppyDataLoader(BaseDataLoader):
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
             return ds
 
-        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'))
+        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
         print(list_data)
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         train_ds = prepare_for_training(ds)
@@ -147,29 +147,8 @@ class GuppyDataLoader(BaseDataLoader):
             img = tf.image.decode_png(file, channels=0)
             img = tf.image.convert_image_dtype(img, tf.float32)
             img = alpha_blend_decoded_png(img)
-            return img
-
-        def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
-            if cache:
-                if isinstance(cache, str):
-                    ds = ds.cache(cache)
-                else:
-                    ds = ds.cache()
-
-            ds = ds.batch(self.config.trainer.batch_size)
-            ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-            return ds
-
-        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'))
-        ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        test_ds = prepare_for_testing(ds)
-
-        return test_ds
-
-    def get_test_labels(self):
-        def preprocess_input(path):
             label = tf.strings.split(path, os.path.sep)[-2]
-            return label
+            return img, label
 
         def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
             if cache:
@@ -182,18 +161,20 @@ class GuppyDataLoader(BaseDataLoader):
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
             return ds
 
-        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'))
+        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         test_ds = prepare_for_testing(ds)
 
         return test_ds
 
     def get_plot_data(self):
+        
         def preprocess_input(path):
             file = tf.io.read_file(path)
             # label = tf.strings.split(path, os.path.sep)[-1]
             img = tf.image.decode_png(file)
-            return img
+            label = tf.strings.split(path, os.path.sep)[-2]
+            return img, label
 
         def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
             if cache:
@@ -206,7 +187,7 @@ class GuppyDataLoader(BaseDataLoader):
             # ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
             return ds
 
-        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'))
+        list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         plot_ds = prepare_for_testing(ds)
         return plot_ds

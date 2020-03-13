@@ -59,8 +59,7 @@ class VAETrainer(BaseTrain):
         self.callbacks.append(
             tf.keras.callbacks.ModelCheckpoint(
                 filepath=os.path.join(self.config.callbacks.checkpoint_dir,
-                                      '%s-{epoch:02d}-{loss:.2f}.hdf5' %
-                                      self.config.exp.name),
+                                      '{}.hdf5'.format(self.config.exp.name)),
                 monitor=self.config.callbacks.checkpoint_monitor,
                 mode=self.config.callbacks.checkpoint_mode,
                 save_best_only=self.config.callbacks.checkpoint_save_best_only,

@@ -15,6 +15,7 @@ VisionEngine/models/vae_modelDRAFT2.py
 data/interim
 report/figures/panels
 report/figures/images
+report_again_kl
 report_again
 bflies.png
 bflype.npy
