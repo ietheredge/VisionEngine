@@ -24,4 +24,4 @@ module load cuda/10.0 cudnn/7.4 nccl/2.3.7 anaconda/3/5.1
 
 # Run the program:
 
-python VisionEngine/main.py -c VisionEngine/configs/butterfly_vae_config_mmd5000_nokl_wpercep_reconp5.json
+python VisionEngine/main.py -c VisionEngine/configs/butterfly_vae_config_mmd5000_nokl_wpercep_reconp5.json > log2.log
