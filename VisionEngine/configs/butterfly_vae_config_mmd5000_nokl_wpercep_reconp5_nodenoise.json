@@ -1,21 +1,21 @@
 {
   "exp": {
-    "name": "guppy_vae_mmd5000_nokl_wpercep_reconp5"
+    "name": "butterfly_vae_mmd5000_nokl_wpercep_reconp5_nodenoise"
   },
   "data_loader": {
-    "name": "guppy_vae_data_loader.GuppyDataLoader",
-    "use_generated": true,
+    "name": "butterfly_vae_data_loader.ButterflyDataLoader",
+    "use_generated": false,
     "use_real": true,
     "folder_loc": "../../data/raw",
-    "n_samples": 32987,
+    "n_samples": 9532,
     "cache": false
   },
   "model":{
     "name": "vae_model.VAEModel",
-    "loadckpt": true,
-    "ckpt_path": "/home/etheredge/Workspace/VisionEngine/models/checkpoints/guppy_vae_mmd5000_nokl_wpercep_reconp5/2020-077-21/guppy_vae_mmd5000_nokl_wpercep_reconp5.hdf5",
+    "loadckpt": false,
+    "ckpt_path": "/u/iethered/VisionEngine/models/checkpoints/butterfly_vae_mmd5000_nokl_wpercep_reconp5_nodenoise/butterfly_vae_mmd5000_nokl_wpercep_reconp5_nodenoise.hdf5",
     "input_shape": [256,256,3],
-    "denoise": true,
+    "denoise": false,
     "sp_ratio": 0.9,
     "noise_ratio": 0.1,
     "n_latents": 4,
@@ -38,7 +38,7 @@
   "trainer":{
     "name": "vae_trainer.VAETrainer",
     "verbose_training": true,
-    "batch_size": 10,
+    "batch_size": 100,
     "validation_split": 0.01,
     "num_epochs": 1000,
     "shuffle": true,
@@ -60,12 +60,12 @@
     "checkpoint_save_best_only": true,
     "checkpoint_save_weights_only": true,
     "checkpoint_verbose": true,
-    "checkpoint_dir": "../checkpoints/guppy_vae",
+    "checkpoint_dir": "../checkpoints/butterfly_vae",
     "save_freq": 10000,
     "use_early_stopping": false,
     "tensorboard_write_graph": true,
     "tensorboard_write_images": false,
     "tensorboard_historgram_freq": 1000,
-    "tensorboard_log_dir": "../logs/guppy_vae"
+    "tensorboard_log_dir": "../logs/butterfly_vae"
   }
 }
