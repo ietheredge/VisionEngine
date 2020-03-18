@@ -16,16 +16,7 @@ import os
 class GuppyDataLoader(BaseDataLoader):
     def __init__(self, config):
         super(GuppyDataLoader, self).__init__(config)
-
-        if self.config.data_loader.use_real is True:
-            if self.config.data_loader.use_generated is True:
-                self.data_dir = pathlib.Path('VisionEngine/data_loaders/datasets/guppies')
-            else:
-                raise NotImplementedError
-            
-        else:
-            raise NotImplementedError
-
+        self.data_dir = pathlib.Path('VisionEngine/data_loaders/datasets/guppies')
 
     def get_train_data(self):
         def alpha_blend_decoded_png(file):
@@ -67,9 +58,9 @@ class GuppyDataLoader(BaseDataLoader):
             if self.config.data_loader.use_generated is True:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*_*'), shuffle=False, seed=42) 
+                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z]/[!a-z]*'), shuffle=False, seed=42)
+            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[*0-9][*0-9]/*'), shuffle=False, seed=42)
 
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         train_ds = prepare_for_training(ds)

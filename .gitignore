@@ -15,6 +15,7 @@ VisionEngine/models/vae_modelDRAFT2.py
 data/interim
 report/figures/panels
 report/figures/images
+report/figures/
 report_again_kl
 report_again
 bflies.png
@@ -24,3 +25,4 @@ bflyve.npy
 VisionEngine/data_loaders/dataset
 butterflies_new/example_real_inputs.png
 notebooks/guppies_new.h5
+vision_engine_embedding.npy

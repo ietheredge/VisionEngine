@@ -29,6 +29,9 @@ def main():
         model = factory.create(
             "VisionEngine.models."+config.model.name
             )(config)
+        
+        if config.model.loadckpt:
+            model.load(config.model.ckpt_path)
 
         print('Create the trainer')
         trainer = factory.create(
