@@ -13,7 +13,7 @@
     "model":{
       "name": "vae_model.VAEModel",
       "loadckpt": true,
-      "ckpt_path": "/home/etheredge/Workspace/VisionEngine/models/checkpoints/guppy_vae_mmd5000_nokl_wpercep_reconp5_nodenoise/2020-077-21/guppy_vae_mmd5000_nokl_wpercep_reconp5_nodenoise.hdf5",
+      "ckpt_path": "/home/etheredge/Workspace/VisionEngine/models/checkpoints/guppy_vae_mmd5000_nokl_wpercep_reconp5_nodenoise/2020-078-13/guppy_vae_mmd5000_nokl_wpercep_reconp5_nodenoise.hdf5",
       "input_shape": [256,256,3],
       "denoise": false,
       "sp_ratio": 0.9,
@@ -43,7 +43,7 @@
       "num_epochs": 1000,
       "shuffle": true,
       "use_lr_scheduler": true,
-      "lr_start": -8,
+      "lr_start": -5,
       "lr_stop": -13,
       "min_delta": 0.0001,
       "patience": 15,

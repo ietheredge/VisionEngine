@@ -26,3 +26,8 @@ VisionEngine/data_loaders/dataset
 butterflies_new/example_real_inputs.png
 notebooks/guppies_new.h5
 vision_engine_embedding.npy
+notebooks/*/*.png
+report_final/
+report_final_new_gens/
+*.h5
+*.npy

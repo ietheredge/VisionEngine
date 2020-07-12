@@ -25,10 +25,10 @@ def generate_fitness_surface(overwrite=False):
     # evenly sample the latent space
     X = np.random.uniform(low=-4,high=4,size=(4, 100000, 10))
     with tf.device("GPU:0"):
-        orange_min = tf.constant([0.9, 0.55, 0.])
-        orange_max = tf.constant([1., 0.75, 0.1])
-        black_min = tf.constant([0., 0., 0.])
-        black_max = tf.constant([[0.2, 0.2, 0.2]])
+        orange_min = tf.constant([0.9, 0.55, 0., 0.5])
+        orange_max = tf.constant([1., 0.75, 0.1, 1.])
+        black_min = tf.constant([0., 0., 0., 0.8])
+        black_max = tf.constant([[0.2, 0.2, 0.2, 1.0]])
         weights = [1., 1.]
 
         fitness = []

@@ -1,13 +1,13 @@
 {
     "exp": {
-      "name": "guppy_vae_mmd5000_nokl_no_percep_reconp5"
+      "name": "guppy_vae_config"
     },
     "data_loader": {
       "name": "guppy_vae_data_loader.GuppyDataLoader",
       "use_generated": true,
-      "use_real": true,
+      "use_real": false,
       "folder_loc": "../../data/raw",
-      "n_samples": 32987,
+      "n_samples": 19000,
       "cache": false
     },
     "model":{
@@ -20,10 +20,10 @@
       "latent_size": 10,
       "optimizer": "adam",
       "recon_loss_weight": 0.5,
-      "use_perceptual_loss": false,
+      "use_perceptual_loss": true,
       "perceptual_loss_model": "vgg",
-      "pereceptual_loss_layers": [2, 5, 9, 13],
-      "perceptual_loss_layer_weights": [10, 10, 10, 10],
+      "pereceptual_loss_layers": [5, 9, 13],
+      "perceptual_loss_layer_weights": [10, 10, 10],
       "mu_prior": 0.0,
       "sigma_prior": 1.0,
       "use_mmd": true,

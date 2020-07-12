@@ -60,7 +60,7 @@ class GuppyDataLoader(BaseDataLoader):
             else:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[*0-9][*0-9]/*'), shuffle=False, seed=42)
+            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
 
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         train_ds = prepare_for_training(ds)
@@ -106,7 +106,7 @@ class GuppyDataLoader(BaseDataLoader):
             else:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*_*'), shuffle=False, seed=42) 
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z]/[!a-z]*'), shuffle=False, seed=42)
+            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
         
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         test_ds = prepare_for_testing(ds)
@@ -136,7 +136,7 @@ class GuppyDataLoader(BaseDataLoader):
             else:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*_*'), shuffle=False, seed=42) 
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z]/[!a-z]*'), shuffle=False, seed=42)
+            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
         
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         plot_ds = prepare_for_testing(ds)
