@@ -32,7 +32,7 @@
       "kl_coef": 8.0,
       "kernel_l2_regularize": 2.5e-5,
       "kernel_rnorm_init": 0.02,
-      "use_wppvae": true,
+      "use_wppvae": true
     },
     "trainer":{
       "name": "vae_trainer.VAETrainer",
