@@ -10,6 +10,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 
+import wppvae
 
 class PerceptualLossLayer(tf.keras.layers.Layer):
     def __init__(self, perceptual_loss_model,
@@ -503,49 +504,83 @@ class VAEModel(Encoder, Decoder):
 
         self.inputs = tf.keras.layers.Input(self.config.model.input_shape)
         self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(self.inputs)
-        with tf.name_scope('z_1_latent'):
-            self.z_1 = NormalVariational(
-                size=self.config.model.latent_size,
-                mu_prior=self.config.model.mu_prior,
-                sigma_prior=self.config.model.sigma_prior,
-                use_kl=self.config.model.use_kl,
-                kl_coef=self.config.model.kl_coef,
-                use_mmd=self.config.model.use_mmd,
-                mmd_coef=self.config.model.mmd_coef,
-                name='z_1_latent')(self.h_1)
 
-        with tf.name_scope('z_2_latent'):
-            self.z_2 = NormalVariational(
-                size=self.config.model.latent_size,
-                mu_prior=self.config.model.mu_prior,
-                sigma_prior=self.config.model.sigma_prior,
-                use_kl=self.config.model.use_kl,
-                kl_coef=self.config.model.kl_coef,
-                use_mmd=self.config.model.use_mmd,
-                mmd_coef=self.config.model.mmd_coef,
-                name='z_2_latent')(self.h_2)
+        if self.config.model.use_wppvae is True:
+            self.h_1 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_1)
+            self.h_1 = wppvae.DenseSiren(
+                100,
+                w0=30.0,
+                kernel_initializer='siren_uniform',
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_1)
 
-        with tf.name_scope('z_3_latent'):
-            self.z_3 = NormalVariational(
-                size=self.config.model.latent_size,
-                mu_prior=self.config.model.mu_prior,
-                sigma_prior=self.config.model.sigma_prior,
-                use_kl=self.config.model.use_kl,
-                kl_coef=self.config.model.kl_coef,
-                use_mmd=self.config.model.use_mmd,
-                mmd_coef=self.config.model.mmd_coef,
-                name='z_3_latent')(self.h_3)
+            self.h_2 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_2)
+            self.h_2 = wppvae.DenseSiren(
+                100,
+                w0=30.0,
+                kernel_initializer='siren_uniform',
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_2)
 
-        with tf.name_scope('z_4_latent'):
-            self.z_4 = NormalVariational(
-                size=self.config.model.latent_size,
-                mu_prior=self.config.model.mu_prior,
-                sigma_prior=self.config.model.sigma_prior,
-                use_kl=self.config.model.use_kl,
-                kl_coef=self.config.model.kl_coef,
-                use_mmd=self.config.model.use_mmd,
-                mmd_coef=self.config.model.mmd_coef,
-                name='z_4_latent')(self.h_4)
+            self.h_3 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_3)
+            self.h_3 = wppvae.DenseSiren(
+                100,
+                w0=30.0,
+                kernel_initializer='siren_uniform',
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_3)
+
+            self.h_4 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_4)
+            self.h_4 = wppvae.DenseSiren(
+                100,
+                w0=30.0,
+                kernel_initializer='siren_uniform',
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_4)
+
+        self.z_1 = NormalVariational(
+            size=self.config.model.latent_size,
+            mu_prior=self.config.model.mu_prior,
+            sigma_prior=self.config.model.sigma_prior,
+            use_kl=self.config.model.use_kl,
+            kl_coef=self.config.model.kl_coef,
+            use_mmd=self.config.model.use_mmd,
+            mmd_coef=self.config.model.mmd_coef,
+            name='z_1_latent')(self.h_1)
+
+        self.z_2 = NormalVariational(
+            size=self.config.model.latent_size,
+            mu_prior=self.config.model.mu_prior,
+            sigma_prior=self.config.model.sigma_prior,
+            use_kl=self.config.model.use_kl,
+            kl_coef=self.config.model.kl_coef,
+            use_mmd=self.config.model.use_mmd,
+            mmd_coef=self.config.model.mmd_coef,
+            name='z_2_latent')(self.h_2)
+
+        self.z_3 = NormalVariational(
+            size=self.config.model.latent_size,
+            mu_prior=self.config.model.mu_prior,
+            sigma_prior=self.config.model.sigma_prior,
+            use_kl=self.config.model.use_kl,
+            kl_coef=self.config.model.kl_coef,
+            use_mmd=self.config.model.use_mmd,
+            mmd_coef=self.config.model.mmd_coef,
+            name='z_3_latent')(self.h_3)
+
+        self.z_4 = NormalVariational(
+            size=self.config.model.latent_size,
+            mu_prior=self.config.model.mu_prior,
+            sigma_prior=self.config.model.sigma_prior,
+            use_kl=self.config.model.use_kl,
+            kl_coef=self.config.model.kl_coef,
+            use_mmd=self.config.model.use_mmd,
+            mmd_coef=self.config.model.mmd_coef,
+            name='z_4_latent')(self.h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
         if self.config.model.use_perceptual_loss is True:
