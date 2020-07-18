@@ -1,14 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import tensorflow_addons as tfa
-from typeguard import typechecked
-
-from tensorflow_addons.utils.types import (
-    Activation,
-    FloatTensorLike,
-    TensorLike,
-    Initializer,
-)
 
 
 class SIRENFirstLayerInitializer(tf.keras.initializers.Initializer):
