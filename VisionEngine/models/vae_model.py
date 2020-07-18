@@ -10,7 +10,8 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 
-import wppvae
+import VisionEngine.models.wppvae as wppvae
+
 
 class PerceptualLossLayer(tf.keras.layers.Layer):
     def __init__(self, perceptual_loss_model,
