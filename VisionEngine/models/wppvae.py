@@ -9,9 +9,10 @@ class SIRENFirstLayerInitializer(tf.keras.initializers.Initializer):
         self.seed = seed
 
     def __call__(self, shape, dtype=tf.float32):
-        fan_in, fan_out = tf.python.ops.init_ops_v2._compute_fans(shape)
+        fan_in = shape[0]
+        fan_out = shape[1]
         limit = self.scale / max(1.0, float(fan_in))
-        return tf.random.uniform(shape, -limit, limit, seed=self.seed)
+        return tf.random.uniform(shape, -1, 1, seed=self.seed)
 
     def get_config(self):
         base_config = super().get_config()
@@ -51,6 +52,13 @@ class Sine(tf.keras.layers.Layer):
 
     def call(self, inputs, **kwargs):
         return tf.sin(self.w0 * inputs)
+    
+    def get_config(self):
+        base_config = super().get_config()
+        config = {
+            'w0': self.w0,
+        }
+        return dict(list(base_config.items()) + list(config.items()))
 
 
 class DenseSiren(tf.keras.layers.Dense):

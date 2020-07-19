@@ -507,41 +507,41 @@ class VAEModel(Encoder, Decoder):
         self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(self.inputs)
 
         if self.config.model.use_wppvae is True:
-            self.h_1 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_1)
+            self.h_1 = wppvae.DenseSiren(self.config.model.wppvae_size, w0=self.config.model.wppvae_w0, kernel_initializer='siren_first_uniform')(self.h_1)
             self.h_1 = wppvae.DenseSiren(
-                100,
-                w0=30.0,
+                self.config.model.wppvae_size,
+                w0=self.config.model.wppvae_w0,
                 kernel_initializer='siren_uniform',
-                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(self.config.model.wppvae_size, weightage=1., axis=0),
                 kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
-                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_1)
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(self.config.model.wppvae_size, weightage=1.))(self.h_1)
 
-            self.h_2 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_2)
+            self.h_2 = wppvae.DenseSiren(self.config.model.wppvae_size, w0=self.config.model.wppvae_w0, kernel_initializer='siren_first_uniform')(self.h_2)
             self.h_2 = wppvae.DenseSiren(
-                100,
-                w0=30.0,
+                self.config.model.wppvae_size,
+                w0=self.config.model.wppvae_w0,
                 kernel_initializer='siren_uniform',
-                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(self.config.model.wppvae_size, weightage=1., axis=0),
                 kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
-                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_2)
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(self.config.model.wppvae_size, weightage=1.))(self.h_2)
 
-            self.h_3 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_3)
+            self.h_3 = wppvae.DenseSiren(self.config.model.wppvae_size, w0=self.config.model.wppvae_w0, kernel_initializer='siren_first_uniform')(self.h_3)
             self.h_3 = wppvae.DenseSiren(
-                100,
-                w0=30.0,
+                self.config.model.wppvae_size,
+                w0=self.config.model.wppvae_w0,
                 kernel_initializer='siren_uniform',
-                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(self.config.model.wppvae_size, weightage=1., axis=0),
                 kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
-                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_3)
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(self.config.model.wppvae_size, weightage=1.))(self.h_3)
 
-            self.h_4 = wppvae.DenseSiren(100, w0=30.0, kernel_initializer='siren_first_uniform')(self.h_4)
+            self.h_4 = wppvae.DenseSiren(self.config.model.wppvae_size, w0=self.config.model.wppvae_w0, kernel_initializer='siren_first_uniform')(self.h_4)
             self.h_4 = wppvae.DenseSiren(
-                100,
-                w0=30.0,
+                self.config.model.wppvae_size,
+                w0=self.config.model.wppvae_w0,
                 kernel_initializer='siren_uniform',
-                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(100, weightage=1., axis=0),
+                kernel_regularizer=wppvae.WeightsOrthogonalityConstraint(self.config.model.wppvae_size, weightage=1., axis=0),
                 kernel_constraint=tf.keras.constraints.UnitNorm(axis=0),
-                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(100, weightage=1.))(self.h_4)
+                activity_regularizer=wppvae.UncorrelatedFeaturesConstraint(self.config.model.wppvae_size, weightage=1.))(self.h_4)
 
         self.z_1 = NormalVariational(
             size=self.config.model.latent_size,
