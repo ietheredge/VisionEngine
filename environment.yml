@@ -11,4 +11,3 @@ dependencies:
   - pip=20.0
   - python=3.8
   - tensorflow-gpu=2.2
-  - tensorflow-probability=0.10
