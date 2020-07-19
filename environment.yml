@@ -1,6 +1,6 @@
 name: vision_engine
 
-chennels:
+channels:
   - conda-forge
   - defaults
 
