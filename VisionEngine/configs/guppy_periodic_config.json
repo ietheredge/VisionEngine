@@ -3,24 +3,27 @@
       "name": "guppy_periodic"
     },
     "data_loader": {
-      "name": "guppy_vae_data_loader.GuppyDataLoader",
+      "name": "vae_data_loader.DataLoader",
+      "dataset": "guppies",
       "use_generated": true,
-      "use_real": true,
-      "folder_loc": "../../data/raw",
-      "n_samples": 32987,
+      "use_real": false,
+      "folder_loc": "VisionEngine/data_loaders/datasets",
+      "n_samples": 19000,
       "cache": false
     },
     "model":{
       "name": "vae_model.VAEModel",
+      "loadckpt": false,
+      "ckpt_path": null,
       "input_shape": [256,256,3],
-      "denoise": true,
+      "denoise": false,
       "sp_ratio": 0.9,
       "noise_ratio": 0.1,
-      "augment": true,
+      "augment": false,
       "n_latents": 4,
       "latent_size": 10,
       "optimizer": "adam",
-      "recon_loss_weight": 0.5,
+      "loss": "mse",
       "use_perceptual_loss": true,
       "perceptual_loss_model": "vgg",
       "pereceptual_loss_layers": [5, 9, 13],
@@ -28,12 +31,13 @@
       "mu_prior": 0.0,
       "sigma_prior": 1.0,
       "use_mmd": true,
-      "mmd_coef": 1000.0,
+      "mmd_coef": 100.0,
       "use_kl": false,
       "kl_coef": 8.0,
       "kernel_l2_regularize": 2.5e-5,
       "kernel_rnorm_init": 0.02,
-      "activations": "tanh",
+      "encoder_activations": "tanh",
+      "decoder_activations": "tanh",
       "last_activation": "tanh",
       "use_wppvae": true,
       "wppvae_size": 10,
@@ -42,9 +46,9 @@
       "siren_kernel_init": "siren_uniform",
       "siren_bias_init": "siren_uniform",
       "siren_activation": "sine",
-      "siren_kernel_regularizer": "weights_orthogonality",
-      "siren_kernel_constraint": "unit_norm",
-      "siren_activity_regularizer": "uncorrelated_features"
+      "siren_kernel_regularizer": null,
+      "siren_kernel_constraint": null,
+      "siren_activity_regularizer": null
 
     },
     "trainer":{
@@ -72,12 +76,13 @@
       "checkpoint_save_best_only": true,
       "checkpoint_save_weights_only": true,
       "checkpoint_verbose": true,
-      "checkpoint_dir": "../checkpoints/guppy_vae",
-      "save_freq": 10000,
-      "use_early_stopping": false,
+      "checkpoint_dir": "checkpoints",
+      "save_freq": 100,
+      "use_early_stopping": true,
+      "early_stopping_monitor": "loss",
       "tensorboard_write_graph": true,
       "tensorboard_write_images": false,
-      "tensorboard_historgram_freq": 1000,
-      "tensorboard_log_dir": "../logs/guppy_vae"
+      "tensorboard_historgram_freq": 100,
+      "tensorboard_log_dir": "logs"
     }
   }

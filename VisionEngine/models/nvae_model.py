@@ -13,6 +13,19 @@ import numpy as np
 import VisionEngine.models.wppvae as wppvae
 
 
+def conv_block(x, n_filters):
+    tf.keras.Sequential([
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.Conv2D(n_filters,1),
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.Activation('swish'),
+                    tf.keras.layers.Dense(
+                        16*16*512, kernel_regularizer=tf.keras.regularizers.l2(
+                            self.config.model.kernel_l2_regularize)),
+
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.Activation(self.config.model.decoder_activations),
+                    tf.keras.layers.Reshape((16, 16, 512))]
 
 
 class SpectralNormalization(tf.keras.layers.Wrapper):

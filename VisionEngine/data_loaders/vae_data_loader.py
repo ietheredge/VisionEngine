@@ -17,7 +17,7 @@ class DataLoader(BaseDataLoader):
     def __init__(self, config):
         super( DataLoader, self).__init__(config)
         self.data_dir = pathlib.Path(os.path.join(os.getenv("VISIONENGINE_HOME"),
-            self.config.data_loader.folder_loc))
+            self.config.data_loader.folder_loc,self.config.data_loader.dataset))
 
     def get_train_data(self):
         def alpha_blend_decoded_png(file):

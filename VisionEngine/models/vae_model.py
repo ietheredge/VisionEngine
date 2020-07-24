@@ -381,7 +381,7 @@ class Encoder(BaseModel):
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.Conv2D(64, 4, 1),
+                    SpectralNormalization(tf.keras.layers.Conv2D(64, 4, 1)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_1')
@@ -394,7 +394,7 @@ class Encoder(BaseModel):
 
             with tf.name_scope('z_2'):
                 h_2_layers = tf.keras.Sequential([
-                    tf.keras.layers.Conv2D(128, 4, 2),
+                    SpectralNormalization(tf.keras.layers.Conv2D(128, 4, 2)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
@@ -403,7 +403,7 @@ class Encoder(BaseModel):
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.Conv2D(256, 4, 2),
+                    SpectralNormalization(tf.keras.layers.Conv2D(256, 4, 2)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_2')
@@ -413,18 +413,18 @@ class Encoder(BaseModel):
 
             with tf.name_scope('z_3'):
                 h_3_layers = tf.keras.Sequential([
-                    tf.keras.layers.Conv2D(
-                        256, 4, 1),
+                    SpectralNormalization(tf.keras.layers.Conv2D(
+                        256, 4, 1)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.Conv2D(
-                        512, 4, 2),
+                    SpectralNormalization(tf.keras.layers.Conv2D(
+                        512, 4, 2)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.Conv2D(
-                        512, 4, 1),
+                    SpectralNormalization(tf.keras.layers.Conv2D(
+                        512, 4, 1)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_3')

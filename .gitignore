@@ -34,3 +34,4 @@ report_final_new_gens/
 env/
 report_wppvae_gens/
 what.png
+notebooks/.ipynb_checkpoints/
