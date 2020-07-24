@@ -313,7 +313,7 @@ class DenseTied(tf.keras.layers.Dense):
 
 
 class WeightsOrthogonalityConstraint(tf.keras.constraints.Constraint):
-    def __init__(self, encoding_dim, weightage: float = 1.0, axis = 0):
+    def __init__(self, encoding_dim=10, weightage: float = 1.0, axis = 0):
         self.encoding_dim = encoding_dim
         self.weightage = weightage
         self.axis = axis
@@ -333,7 +333,7 @@ class WeightsOrthogonalityConstraint(tf.keras.constraints.Constraint):
     
 
 class UncorrelatedFeaturesConstraint(tf.keras.constraints.Constraint):
-    def __init__(self, encoding_dim, weightage: float = 1.0):
+    def __init__(self, encoding_dim=10, weightage: float = 1.0):
         self.encoding_dim = encoding_dim
         self.weightage = weightage
 
@@ -362,10 +362,26 @@ class UncorrelatedFeaturesConstraint(tf.keras.constraints.Constraint):
         self.covariance = self.get_covariance(x)
         return self.weightage * self.uncorrelated_feature(x)
 
+
+class MyUnitNorm(tf.keras.constraints.Constraint):
+  def __init__(self, axis=0):
+    self.axis = axis
+
+  def __call__(self, w):
+    return w / (
+        tf.keras.backend.epsilon() + tf.keras.backend.sqrt(
+            tf.math.reduce_sum(
+                tf.math.square(w), axis=self.axis, keepdims=True)))
+
+  def get_config(self):
+    return {'axis': self.axis}
+
+
 tf.keras.utils.get_custom_objects().update({
     'sine': Sine,
     'siren_uniform': SIRENInitializer,
     'siren_first_uniform': SIRENFirstLayerInitializer,
     'uncorrelated_features': UncorrelatedFeaturesConstraint,
-    'weights_orthogonality': WeightsOrthogonalityConstraint
+    'weights_orthogonality': WeightsOrthogonalityConstraint,
+    'unit_norm': MyUnitNorm
 })

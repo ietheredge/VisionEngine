@@ -6,7 +6,6 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 """
 from VisionEngine.base.base_data_loader import BaseDataLoader
 
-# from VisionEngine.datasets import guppies, generated_guppies
 import numpy as np
 import tensorflow as tf
 import pathlib
@@ -14,15 +13,16 @@ import os
 from skimage.util import random_noise
 
 
-class GuppyDataLoader(BaseDataLoader):
+class DataLoader(BaseDataLoader):
     def __init__(self, config):
-        super(GuppyDataLoader, self).__init__(config)
-        self.data_dir = pathlib.Path('VisionEngine/data_loaders/datasets/guppies')
+        super( DataLoader, self).__init__(config)
+        self.data_dir = pathlib.Path(os.path.join(os.getenv("VISIONENGINE_HOME"),
+            self.config.data_loader.folder_loc))
 
     def get_train_data(self):
         def alpha_blend_decoded_png(file):
             # alpha blending with a white background 
-            bg = tf.ones((256,256,3))  # if you want black change to tf.zeros
+            bg = tf.ones((256,256,3))  # change to tf.zeros for a black bg
             r = ((1 - file[:, :, 3]) * bg[:, :, 0]) \
                     + (file[:, :, 3] * file[:, :, 0])
             g = ((1 - file[:, :, 3]) * bg[:, :, 1]) \
@@ -33,14 +33,18 @@ class GuppyDataLoader(BaseDataLoader):
             return rgb
 
         def preprocess_input(path):
-            file = tf.io.read_file(path)
+            FILE = tf.io.read_file(path)
             label = tf.strings.split(path, os.path.sep)[-2]
-            img = tf.image.decode_png(file, channels=0)
+            img = tf.image.decode_png(FILE, channels=0)
             img = tf.image.convert_image_dtype(img, tf.float32)
             img = alpha_blend_decoded_png(img)
             output_img = img
             if self.config.model.augment is True:
                 img, output_img = self.random_jitter(img, output_img)
+
+            if self.config.model.final_activation == 'tanh':
+                self.normalize(img, output_img)
+
             return img, output_img
 
         def prepare_for_training(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
@@ -58,14 +62,28 @@ class GuppyDataLoader(BaseDataLoader):
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
             return ds
 
-        # TODO
-        if self.config.data_loader.use_real is True:
-            if self.config.data_loader.use_generated is True:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+        # butterfly dataset
+        if self.config.data_loader.dataset == 'butterflies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
+                raise NotImplementedError
+    
+        # guppy dataset
+        elif self.config.data_loader.dataset == 'guppies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
+            else:
+                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+            raise NotImplementedError
 
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         train_ds = prepare_for_training(ds)
@@ -86,12 +104,15 @@ class GuppyDataLoader(BaseDataLoader):
             return rgb
 
         def preprocess_input(path):
-            file = tf.io.read_file(path)
+            FILE = tf.io.read_file(path)
             label = tf.strings.split(path, os.path.sep)[-2]
-            img = tf.image.decode_png(file, channels=0)
+            img = tf.image.decode_png(FILE, channels=0)
             img = tf.image.convert_image_dtype(img, tf.float32)
             img = alpha_blend_decoded_png(img)
             label = tf.strings.split(path, os.path.sep)[-2]
+            if self.config.model.final_activation == 'tanh':
+                img, _ = self.normalize(img, None)
+
             return img, label
 
         def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
@@ -105,14 +126,28 @@ class GuppyDataLoader(BaseDataLoader):
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
             return ds
 
-        # TODO generalize this for a generic dataloader
-        if self.config.data_loader.use_real is True:
-            if self.config.data_loader.use_generated is True:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+        # butterfly dataset
+        if self.config.data_loader.dataset == 'butterflies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*_*'), shuffle=False, seed=42) 
+                raise NotImplementedError
+    
+        # guppy dataset
+        elif self.config.data_loader.dataset == 'guppies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
+            else:
+                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+            raise NotImplementedError
         
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         test_ds = prepare_for_testing(ds)
@@ -122,8 +157,8 @@ class GuppyDataLoader(BaseDataLoader):
     def get_plot_data(self):
         
         def preprocess_input(path):
-            file = tf.io.read_file(path)
-            img = tf.image.decode_png(file)
+            FILE = tf.io.read_file(path)
+            img = tf.image.decode_png(FILE)
             label = tf.strings.split(path, os.path.sep)[-2]
             return img, label
 
@@ -136,17 +171,43 @@ class GuppyDataLoader(BaseDataLoader):
 
             return ds
 
-        if self.config.data_loader.use_real is True:
-            if self.config.data_loader.use_generated is True:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+        # butterfly dataset
+        if self.config.data_loader.dataset == 'butterflies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*_*'), shuffle=False, seed=42) 
+                raise NotImplementedError
+    
+        # guppy dataset
+        elif self.config.data_loader.dataset == 'guppies':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
+            else:
+                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+
         else:
-            list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+            raise NotImplementedError
         
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         plot_ds = prepare_for_testing(ds)
         return plot_ds
+
+    @staticmethod
+    def normalize(input_image, real_image):
+        # normalize between [-1, 1] if using tanh activation
+        input_image = (input_image / 0.5) - 1
+        if real_image:
+            real_image = (real_image / 0.5) - 1
+            return input_image, real_image
+
+        else:
+            return input_image, real_image   
 
     @staticmethod
     def resize(input_image, real_image, height, width):
@@ -157,6 +218,7 @@ class GuppyDataLoader(BaseDataLoader):
             method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
 
         return input_image, real_image
+
     
     @staticmethod
     def random_crop(input_image, real_image, img_height, img_width):
@@ -180,63 +242,3 @@ class GuppyDataLoader(BaseDataLoader):
             real_image = tf.image.flip_left_right(real_image)
 
         return input_image, real_image
-
-# class GuppyDataLoader(BaseDataLoader):
-#     def __init__(self, config):
-#         super(GuppyDataLoader, self).__init__(config)
-
-#         if self.config.data_loader.use_real is True:
-#             (self.X_train, self.y_train), (_, _) = \
-#                 guppies.load_data()
-
-#         if self.config.data_loader.use_generated is True:
-#             (self.X_trainG, self.y_trainG), (_, _) = \
-#                 generated_guppies.load_data()
-
-#         if self.config.data_loader.use_real is True:
-#             if self.config.data_loader.use_generated is True:
-#                 self.X_train = np.concatenate((self.X_train, self.X_trainG))
-#                 self.y_train = np.concatenate((self.y_train, self.y_trainG))
-
-#         else:
-#             self.X_train = self.X_trainG
-#             self.y_train = self.y_trainG
-
-#     def get_train_data(self):
-#         if self.config.model.input_shape[-1] == 3:
-#             if self.X_train.shape[-1] == 4:
-#                 # assumes a white background
-#                 bg = np.ones(self.X_train.shape)[:, :, :, :3]
-#                 r = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 0]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 0])
-#                 g = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 1]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 1])
-#                 b = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 2]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 2])
-#                 return np.stack([r, g, b], axis=3), self.y_train
-#             else:
-#                 return self.X_train, self.y_train
-
-#         else:
-#             return self.X_train, self.y_train
-
-#     def get_test_data(self):
-#         if self.config.model.input_shape[-1] == 3:
-#             if self.X_train.shape[-1] == 4:
-#                 # assumes a white background
-#                 bg = np.ones(self.X_train.shape)[:, :, :, :3]
-#                 r = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 0]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 0])
-#                 g = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 1]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 1])
-#                 b = ((1 - self.X_train[:, :, :, 3]) * bg[:, :, :, 2]) \
-#                     + (self.X_train[:, :, :, 3] * self.X_train[:, :, :, 2])
-#                 return np.stack([r, g, b], axis=3), self.y_train
-#             else:
-#                 return self.X_train, self.y_train
-
-#         else:
-#             return self.X_train, self.y_train
-
-#     def get_plot_data(self):
-#         return self.X_train, self.y_train

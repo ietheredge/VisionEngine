@@ -13,6 +13,8 @@ import numpy as np
 import VisionEngine.models.wppvae as wppvae
 
 
+
+
 class SpectralNormalization(tf.keras.layers.Wrapper):
     def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
         self.iteration = iteration

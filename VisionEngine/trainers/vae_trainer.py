@@ -58,13 +58,14 @@ class VAETrainer(BaseTrain):
     def init_callbacks(self):
         self.callbacks.append(
             tf.keras.callbacks.ModelCheckpoint(
-                filepath=os.path.join(self.config.callbacks.checkpoint_dir,
-                                      '{}.hdf5'.format(self.config.exp.name)),
+                filepath=os.path.join(os.getenv("VISIONENGINE_HOME"),
+                    self.config.callbacks.checkpoint_dir,
+                    '{}.hdf5'.format(self.config.exp.name)),
+
                 monitor=self.config.callbacks.checkpoint_monitor,
                 mode=self.config.callbacks.checkpoint_mode,
                 save_best_only=self.config.callbacks.checkpoint_save_best_only,
-                save_weights_only=self.config.callbacks
-                .checkpoint_save_weights_only,
+                save_weights_only=self.config.callbacks.checkpoint_save_weights_only,
                 verbose=self.config.callbacks.checkpoint_verbose,
                 save_freq=self.config.callbacks.save_freq,
             )
@@ -96,7 +97,8 @@ class VAETrainer(BaseTrain):
             self.callbacks.append(
                 tf.keras.callbacks.EarlyStopping(
                     min_delta=self.config.trainer.min_delta,
-                    patience=self.config.trainer.patience
+                    patience=self.config.trainer.patience,
+                    monitor=self.config.callbacks.early_stopping_monitor
                 )
             )
 
@@ -113,13 +115,13 @@ class VAETrainer(BaseTrain):
             )
 
     def train(self):
-        self.model.fit_generator(self.data,
+        self.model.fit(self.data,
                 epochs=self.config.trainer.num_epochs,
                 callbacks=self.callbacks,
                 steps_per_epoch=int(self.config.data_loader.n_samples/self.config.trainer.batch_size)+1,
                 )
         self.model.save_weights(
-            os.path.join(
+            os.path.join(os.getenv("VISIONENGINE_HOME"),
                 self.config.callbacks.checkpoint_dir,
                 '%s-{epoch:02d}-{loss:.2f}.hdf50' % self.config.exp.name)
         )
