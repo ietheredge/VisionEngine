@@ -43,7 +43,6 @@ class SqueezeExcite(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-
 class SpectralNormalization(tf.keras.layers.Wrapper):
     def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
         self.iteration = iteration
@@ -178,92 +177,6 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-# class NormalVariational(tf.keras.layers.Layer):
-#     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
-#                  use_kl=False, kl_coef=1.0,
-#                  use_mmd=True, mmd_coef=100.0, name=None, **kwargs):
-#         super().__init__(**kwargs)
-#         self.variational = tf.keras.layers.Dense(size)
-#         self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
-#         self.sigma_prior = tf.constant(
-#             sigma_prior, dtype=tf.float32, shape=(size,)
-#             )
-
-#         self.use_kl = use_kl
-#         self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
-#         self.use_mmd = use_mmd
-#         self.mmd_coef = mmd_coef
-#         self.kernel_f = self._rbf
-
-#     def _rbf(self, x, y):
-#         x_size = tf.shape(x)[0]
-#         y_size = tf.shape(y)[0]
-#         dim = tf.shape(x)[1]
-#         tiled_x = tf.tile(tf.reshape(x, tf.stack([x_size, 1, dim])),
-#                           tf.stack([1, y_size, 1]))
-
-#         tiled_y = tf.tile(tf.reshape(y, tf.stack([1, y_size, dim])),
-#                           tf.stack([x_size, 1, 1]))
-
-#         return tf.exp(-tf.reduce_mean(tf.square(tiled_x - tiled_y), axis=2) /
-#                       tf.cast(dim, tf.float32))
-
-#     def use_kl_divergence(self, q_mu, q_sigma, p_mu, p_sigma):
-#         r = q_mu - p_mu
-#         kl = self.kl_coef * tf.reduce_mean(
-#             tf.reduce_sum(
-#                 tf.math.log(p_sigma) -
-#                 tf.math.log(q_sigma) -
-#                 .5 * (1. - (q_sigma**2 + r**2) / p_sigma**2), axis=1
-#                 )
-#             )
-
-#         self.add_loss(kl)
-#         self.add_metric(kl, 'mean', 'kl_divergence')
-
-#     def add_mm_discrepancy(self, z, z_prior):
-#         k_prior = self.kernel_f(z_prior, z_prior)
-#         k_post = self.kernel_f(z, z)
-#         k_prior_post = self.kernel_f(z_prior, z)
-#         mmd = tf.reduce_mean(k_prior) + \
-#             tf.reduce_mean(k_post) - \
-#             2 * tf.reduce_mean(k_prior_post)
-
-#         mmd = tf.multiply(self.mmd_coef,  mmd, name='mmd')
-#         self.add_loss(mmd)
-#         self.add_metric(mmd, 'mean', 'mmd_discrepancy')
-
-#     def call(self, inputs):
-#         if self.use_mmd:
-#             z = self.variational(inputs)
-#             z_prior = tfp.distributions.MultivariateNormalDiag(
-#                 self.mu_prior, self.sigma_prior
-#                 ).sample(tf.shape(z)[0])
-#             self.add_mm_discrepancy(z, z_prior)
-
-#         if self.use_kl:
-#             mu = self.mu_layer(inputs)
-#             log_sigma = self.sigma_layer(inputs)
-#             sigma_square = tf.exp(log_sigma)
-#             self.use_kl_divergence(
-#                 mu,
-#                 sigma_square,
-#                 self.mu_prior,
-#                 self.sigma_prior)
-
-#         return z
-
-#     def get_config(self):
-#         base_config = super(NormalVariational, self).get_config()
-#         config = {
-#             'use_kl': self.use_kl,
-#             'use_mmd': self.use_mmd,
-#             'mmd_coef': self.mmd_coef,
-#             'kernel_f': self.kernel_f,
-#         }
-
-#         return dict(list(base_config.items()) + list(config.items()))
-
 class NormalVariational(tf.keras.layers.Layer):
     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
                     use_kl=False, kl_coef=1.0,
@@ -356,7 +269,6 @@ class NormalVariational(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-
 class SaltAndPepper(tf.keras.layers.Layer):
     def __init__(self, ratio=0.9, **kwargs):
         super(SaltAndPepper, self).__init__(**kwargs)
@@ -408,13 +320,13 @@ class Encoder(BaseModel):
                 h_1_layers = tf.keras.Sequential([
                     tf.keras.layers.Input(self.config.model.input_shape),
                     SpectralNormalization(tf.keras.layers.Conv2D(
-                        8, 3,  padding='same')),
+                        8, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
-                        16, 3,  padding='same')),
+                        16, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
@@ -426,9 +338,7 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         32, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_1')
+                    tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_1')
                 if self.config.modeul.denoise is True:
                     h_1 = h_1_layers(noisy_inputs)
                 else:
@@ -457,9 +367,7 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         128, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_2')
+                    tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_2')
 
                 h_2 = h_2_layers(h_1)
                 h_2_flatten = SqueezeExcite(c=128)(h_2)
@@ -485,9 +393,7 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         512, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_3')
+                    tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_3')
 
                 h_3 = h_3_layers(h_2)
                 h_3_flatten = SqueezeExcite(c=512)(h_3)
@@ -513,9 +419,7 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         2048, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_4')
+                    tf.keras.layers.Activation(self.config.model.encoder_activations)], name='h_4')
 
                 h_4 = h_4_layers(h_3)
                 h_4_flatten = SqueezeExcite(c=2048)(h_4)
@@ -550,62 +454,40 @@ class Decoder(BaseModel):
 
             with tf.name_scope('z_tilde_4'):
                 z_4 = self.z_4_input
-                z_4 = tf.keras.layers.Dense(16*16*2048, activation=None)(z_4)
-                z_4 = tf.keras.layers.Reshape((16,16,2048))(z_4)
-                
                 z_tilde_4_layers = tf.keras.Sequential([
-                    tf.keras.layers.UpSampling2D(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        2048,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        1024,
-                        kernel_size=3,
-                        padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        1024,
-                        kernel_size=3,
-                        padding='same')),
+                    tf.keras.layers.Dense(
+                        16*16*512, kernel_regularizer=tf.keras.regularizers.l2(
+                            self.config.model.kernel_l2_regularize)),
+
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        512,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.decoder_activations)], name='z_tilde_4')
+                    tf.keras.layers.Activation(self.config.model.decoder_activations),
+                    tf.keras.layers.Reshape((16, 16, 512))], name='z_tilde_4')
+
                 z_tilde_4 = z_tilde_4_layers(z_4)
 
             with tf.name_scope('z_tilde_3'):
-                z_3 = self.z_3_input
-                z_3 = tf.keras.layers.Dense(32*32*512, activation=None)(z_3)
-                z_3 = tf.keras.layers.Reshape((32,32,512))(z_3)
+                z_3 = tf.keras.layers.Dense(
+                    16*16*512)(self.z_3_input)
 
+                z_3 = tf.keras.layers.BatchNormalization()(z_3)
+                z_3 = tf.keras.layers.Activation(self.config.model.decoder_activations)(z_3)
+                z_3 = tf.keras.layers.Reshape((16, 16, 512))(z_3)
                 z_tilde_3_layers = tf.keras.Sequential([
-                    tf.keras.layers.UpSampling2D(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        512,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        256,
-                        kernel_size=3,
-                        padding='same')),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        512, 4, 1, padding='same')),
+
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        256,
-                        kernel_size=3,
-                        padding='same')),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        256, 4, 2, padding='same')),
+
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        128,
-                        kernel_size=3,
-                        padding='same')),
+                    tf.keras.layers.Activation(self.config.model.decoder_activations),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        256, 4, 1, padding='same')),
+
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations)], name='z_tilde_3')
 
@@ -613,32 +495,24 @@ class Decoder(BaseModel):
                 z_tilde_3 = z_tilde_3_layers(input_z_tilde_3)
 
             with tf.name_scope('z_tilde_2'):
-                z_2 = self.z_2_input
-                z_2 = tf.keras.layers.Dense(64*64*128, activation=None)(z_2)
-                z_2 = tf.keras.layers.Reshape((64,64,128))(z_2)
-                                                        
+                z_2 = tf.keras.layers.Dense(
+                    32*32*256)(self.z_2_input)
+                z_2 = tf.keras.layers.BatchNormalization()(z_2)
+                z_2 = tf.keras.layers.Activation(self.config.model.decoder_activations)(z_2)
+                z_2 = tf.keras.layers.Reshape((32, 32, 256))(z_2)
+                
                 z_tilde_2_layers = tf.keras.Sequential([
-                    tf.keras.layers.UpSampling2D(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        128,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        64,
-                        kernel_size=3,
-                        padding='same')),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        128, 4, 2, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        64,
-                        kernel_size=3,
-                        padding='same')),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        128, 4, 1, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        32,
-                        kernel_size=3,
-                        padding='same')),
+                    tf.keras.layers.Activation(self.config.model.decoder_activations),
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        64, 4, 2, padding='same')),
+
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations)], name='z_tilde_2')
 
@@ -646,36 +520,20 @@ class Decoder(BaseModel):
                 z_tilde_2 = z_tilde_2_layers(input_z_tilde_2)
 
             with tf.name_scope('z_tilde_1'):
-                z_1 = self.z_1_input
-                z_1 = tf.keras.layers.Dense(128*128*32, activation=None)(z_1)
-                z_1 = tf.keras.layers.Reshape((128,128,32))(z_1)
+                z_1 = tf.keras.layers.Dense(128*128*64)(self.z_1_input)
+
+                z_1 = tf.keras.layers.BatchNormalization()(z_1)
+                z_1 = tf.keras.layers.Activation(self.config.model.decoder_activations)(z_1)
+                z_1 = tf.keras.layers.Reshape((128, 128, 64))(z_1)
                 z_tilde_1_layers = tf.keras.Sequential([
-                    tf.keras.layers.UpSampling2D(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        32,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        16,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.decoder_activations),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        16,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        8,
-                        kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.Activation(self.config.model.decoder_activations),
-                    SpectralNormalization(tf.keras.layers.Conv2D(
-                        self.config.model.input_shape[2], 3, 1, padding='same')),
-                    tf.keras.layers.Activation(self.config.model.last_activation)], name='z_tilde_1')
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        128, 4, 2, padding='same')),
+
+                    SpectralNormalization(tf.keras.layers.Conv2DTranspose(
+                        self.config.model.input_shape[2], 4, 1, padding='same')),
+
+                    tf.keras.layers.Activation(self.config.model.last_activation)
+                    ], name='z_tilde_1')
 
                 input_z_tilde_1 = tf.keras.layers.Concatenate()([z_tilde_2, z_1])
 
@@ -688,6 +546,7 @@ class Decoder(BaseModel):
                 self.decoder_inputs,
                 self.decoder_outputs,
                 name='decoder')
+
 
 class VAEModel(Encoder, Decoder):
     def __init__(self, config):
