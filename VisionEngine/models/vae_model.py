@@ -376,8 +376,8 @@ class Encoder(BaseModel):
             with tf.name_scope('z_1'):
                 h_1_layers = tf.keras.Sequential([
                     tf.keras.layers.Input(self.config.model.input_shape),
-                    tf.keras.layers.Conv2D(
-                        64, 4, 2),
+                    SpectralNormalization(tf.keras.layers.Conv2D(
+                        64, 4, 2)),
 
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
