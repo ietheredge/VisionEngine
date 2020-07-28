@@ -410,8 +410,6 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         8, 3,  padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         16, 3,  padding='same')),
@@ -420,15 +418,12 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         16, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         32, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_1')
+                    tf.keras.layers.AveragePooling2D()], name='h_1')
                 if self.config.modeul.denoise is True:
                     h_1 = h_1_layers(noisy_inputs)
                 else:
@@ -441,8 +436,6 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         32, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         64, 3, padding='same')),
@@ -450,9 +443,6 @@ class Encoder(BaseModel):
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         128, 3, padding='same')),
@@ -469,8 +459,6 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         128, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         256, 3, padding='same')),
@@ -478,8 +466,6 @@ class Encoder(BaseModel):
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         256, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
@@ -497,8 +483,6 @@ class Encoder(BaseModel):
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         512, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         1024, 3, padding='same')),
@@ -506,16 +490,13 @@ class Encoder(BaseModel):
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         1024, 3, padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalization(tf.keras.layers.Conv2D(64, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     SpectralNormalization(tf.keras.layers.Conv2D(
                         2048, 3, padding='same')),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
-                    tf.keras.layers.AveragePooling2D(),
-                ], name='h_4')
+                    tf.keras.layers.AveragePooling2D()], name='h_4')
 
                 h_4 = h_4_layers(h_3)
                 h_4_flatten = SqueezeExcite(c=2048)(h_4)
