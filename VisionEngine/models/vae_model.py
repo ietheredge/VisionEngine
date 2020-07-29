@@ -106,7 +106,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
 
 
 class PerceptualLossLayer(tf.keras.layers.Layer):
-    def __init__(self, perceptual_loss_model,
+    def __init__(self, perceptual_loss_model, incoming_activation,
                  pereceptual_loss_layers, perceptual_loss_layer_weights,
                  model_input_shape, name, **kwargs):
         super(PerceptualLossLayer, self).__init__(**kwargs)
@@ -114,6 +114,8 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         self.layers = pereceptual_loss_layers
         self.layer_weights = perceptual_loss_layer_weights
         self.model_input_shape = [256, 256, 3]
+        self.n_layers = len(pereceptual_loss_layers)
+        self.incoming_activation = incoming_activation
 
     def build(self, input_shape):
         if self.loss_model_type == 'vgg':
@@ -127,13 +129,18 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
             for layer in self.loss_model_.layers:
                 layer.trainable = False
 
+            # self.loss_layers = [
+            #     self.loss_model_.layers[i].output
+            #     for i in self.layers
+            #     ]
+
             self.loss_layers = [
-                tf.keras.layers.BatchNormalization()(self.loss_model_.layers[i].output)
-                for i in self.layers
+                self.loss_model_.get_layer(name).output
+                for name in self.layers
                 ]
 
             self.loss_model = tf.keras.Model(
-                self.loss_model_.inputs,
+                [self.loss_model_.input],
                 self.loss_layers,
                 )
         else:
@@ -141,29 +148,57 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         super(PerceptualLossLayer, self).build(input_shape)
 
     def call(self, layer_inputs, **kwargs):
-        y_true = layer_inputs[0]
-        y_pred = layer_inputs[1]
+        if self.incoming_activation == 'tanh':
+            y_true = layer_inputs[0] * 0.5 + 0.5
+            y_pred = layer_inputs[1] * 0.5 + 0.5
+        else:
+            y_true = layer_inputs[0]
+            y_pred = layer_inputs[1]
 
-        self.sample_ = self.loss_model(y_true)
-        self.reconstruction_ = self.loss_model(y_pred)
+        y_true = tf.keras.applications.vgg19.preprocess_input(
+            y_true*255.0)
+        y_pred = tf.keras.applications.vgg19.preprocess_input(
+            y_pred*255.0)
 
-        self.perceptual_loss = 0.
-        for i in range(len(self.reconstruction_)):
-            shape = tf.cast(tf.shape(self.reconstruction_[i]), dtype='float32')
-            self.perceptual_loss += tf.math.reduce_mean(
-                self.layer_weights[i] *
-                (tf.math.reduce_sum(tf.math.square(self.sample_[i] - self.reconstruction_[i])) /
-                    (shape[-1] * shape[1] * shape[1]))
-            )
+        sample = self.loss_model(y_true)
+        reconstruction = self.loss_model(y_pred)
 
-        perceptual_loss = tf.cast(self.perceptual_loss, dtype='float32')
-        self.add_loss(perceptual_loss)
-        self.add_metric(perceptual_loss, 'mean', 'perceptual_loss')
+        self.sample_ = [self.gram_matrix(sample_output)
+                        for sample_output in sample]
+        self.reconstruction_ = [self.gram_matrix(reconstruction_output)
+                                for reconstruction_output in reconstruction]
 
-        return [y_true, y_pred]
+        # self.perceptual_loss = 0.
+        # for i in range(len(self.reconstruction_)):
+        #     shape = tf.cast(tf.shape(self.reconstruction_[i]), dtype='float32')
+        #     self.perceptual_loss += tf.math.reduce_mean(
+        #         self.layer_weights[i] *
+        #         (tf.math.reduce_sum(tf.math.square(self.sample_[i] - self.reconstruction_[i])) /
+        #             (shape[-1] * shape[1] * shape[1]))
+        #     )
+
+        self.perceptual_loss = tf.add_n([tf.reduce_mean((self.reconstruction_[name] - self.sample_[name])**2) 
+                           for name, _ in enumerate(self.reconstruction_)])
+        self.perceptual_loss *= self.layer_weights / self.n_layers
+
+        # for i in range(len(self.reconstruction_)):
+        #     self.perceptual_loss += self.layer_weights[i] * gram_matrix(self.reconstruction_[i])
+        # perceptual_loss = tf.cast(self.perceptual_loss, dtype='float32')
+        self.add_loss(self.perceptual_loss)
+        self.add_metric(self.perceptual_loss, 'mean', 'perceptual_loss')
+
+        return [layer_inputs[0], layer_inputs[1]]
 
     def compute_output_shape(self, input_shape):
         return input_shape
+
+
+    @staticmethod
+    def gram_matrix(input_tensor):
+        result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
+        input_shape = tf.shape(input_tensor)
+        num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
+        return result/(num_locations)
 
     def get_config(self):
         config = {
@@ -272,7 +307,6 @@ class NormalVariational(tf.keras.layers.Layer):
         self.mu_layer = tf.keras.layers.Dense(size)
         self.sigma_layer = tf.keras.layers.Dense(size)
         if use_kl is True:
-            # self.sigma_layer = tf.keras.layers.Dense(size)
             self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
         self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
         self.sigma_prior = tf.constant(
@@ -424,7 +458,8 @@ class Encoder(BaseModel):
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.encoder_activations),
                     tf.keras.layers.AveragePooling2D()], name='h_1')
-                if self.config.modeul.denoise is True:
+
+                if self.config.model.denoise is True:
                     h_1 = h_1_layers(noisy_inputs)
                 else:
                     h_1 = h_1_layers(self.encoder_inputs)
@@ -590,7 +625,7 @@ class Decoder(BaseModel):
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations)], name='z_tilde_3')
 
-                input_z_tilde_3 = tf.keras.layers.Concatenate()([z_tilde_4, z_3])
+                input_z_tilde_3 = tf.keras.layers.Add()([z_tilde_4, z_3])
                 z_tilde_3 = z_tilde_3_layers(input_z_tilde_3)
 
             with tf.name_scope('z_tilde_2'):
@@ -623,7 +658,7 @@ class Decoder(BaseModel):
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation(self.config.model.decoder_activations)], name='z_tilde_2')
 
-                input_z_tilde_2 = tf.keras.layers.Concatenate()([z_tilde_3, z_2])
+                input_z_tilde_2 = tf.keras.layers.Add()([z_tilde_3, z_2])
                 z_tilde_2 = z_tilde_2_layers(input_z_tilde_2)
 
             with tf.name_scope('z_tilde_1'):
@@ -658,7 +693,7 @@ class Decoder(BaseModel):
                         self.config.model.input_shape[2], 3, 1, padding='same')),
                     tf.keras.layers.Activation(self.config.model.last_activation)], name='z_tilde_1')
 
-                input_z_tilde_1 = tf.keras.layers.Concatenate()([z_tilde_2, z_1])
+                input_z_tilde_1 = tf.keras.layers.Add()([z_tilde_2, z_1])
 
                 self.decoder_outputs = z_tilde_1_layers(input_z_tilde_1)
                 self.decoder_inputs = [
@@ -862,6 +897,7 @@ class VAEModel(Encoder, Decoder):
             with tf.name_scope('perceptual_loss'):
                 (_, self.outputs) = PerceptualLossLayer(
                     perceptual_loss_model=self.config.model.perceptual_loss_model,
+                    incoming_activation=self.config.model.last_activation,
                     pereceptual_loss_layers=self.config.model.pereceptual_loss_layers,
                     perceptual_loss_layer_weights=self.config.model.perceptual_loss_layer_weights,
                     model_input_shape=self.config.model.input_shape,

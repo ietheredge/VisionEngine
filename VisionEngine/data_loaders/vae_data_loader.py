@@ -56,7 +56,7 @@ class DataLoader(BaseDataLoader):
             
             if self.config.trainer.shuffle:
                 ds = ds.shuffle(buffer_size=shuffle_buffer_size)
-            
+
             ds = ds.repeat()
             ds = ds.batch(self.config.trainer.batch_size)
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
