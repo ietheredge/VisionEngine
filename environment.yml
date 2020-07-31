@@ -8,6 +8,7 @@ dependencies:
   - cudatoolkit=10.1
   - cudnn=7.6
   - nccl=2.4
+  - cupti=10.1
   - pip=20.0
   - python=3.8
   - tensorflow-gpu=2.2
