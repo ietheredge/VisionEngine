@@ -43,7 +43,6 @@ class SqueezeExcite(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-
 class SpectralNormalization(tf.keras.layers.Wrapper):
     def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
         self.iteration = iteration
@@ -129,11 +128,6 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
             for layer in self.loss_model_.layers:
                 layer.trainable = False
 
-            # self.loss_layers = [
-            #     self.loss_model_.layers[i].output
-            #     for i in self.layers
-            #     ]
-
             self.loss_layers = [
                 self.loss_model_.get_layer(name).output
                 for name in self.layers
@@ -168,22 +162,10 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         self.reconstruction_ = [self.gram_matrix(reconstruction_output)
                                 for reconstruction_output in reconstruction]
 
-        # self.perceptual_loss = 0.
-        # for i in range(len(self.reconstruction_)):
-        #     shape = tf.cast(tf.shape(self.reconstruction_[i]), dtype='float32')
-        #     self.perceptual_loss += tf.math.reduce_mean(
-        #         self.layer_weights[i] *
-        #         (tf.math.reduce_sum(tf.math.square(self.sample_[i] - self.reconstruction_[i])) /
-        #             (shape[-1] * shape[1] * shape[1]))
-        #     )
-
         self.perceptual_loss = tf.add_n([tf.reduce_mean((self.reconstruction_[name] - self.sample_[name])**2) 
                            for name, _ in enumerate(self.reconstruction_)])
         self.perceptual_loss *= self.layer_weights / self.n_layers
 
-        # for i in range(len(self.reconstruction_)):
-        #     self.perceptual_loss += self.layer_weights[i] * gram_matrix(self.reconstruction_[i])
-        # perceptual_loss = tf.cast(self.perceptual_loss, dtype='float32')
         self.add_loss(self.perceptual_loss)
         self.add_metric(self.perceptual_loss, 'mean', 'perceptual_loss')
 
@@ -191,7 +173,6 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape
-
 
     @staticmethod
     def gram_matrix(input_tensor):
@@ -212,92 +193,6 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
             super(PerceptualLossLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-
-# class NormalVariational(tf.keras.layers.Layer):
-#     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
-#                  use_kl=False, kl_coef=1.0,
-#                  use_mmd=True, mmd_coef=100.0, name=None, **kwargs):
-#         super().__init__(**kwargs)
-#         self.variational = tf.keras.layers.Dense(size)
-#         self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
-#         self.sigma_prior = tf.constant(
-#             sigma_prior, dtype=tf.float32, shape=(size,)
-#             )
-
-#         self.use_kl = use_kl
-#         self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
-#         self.use_mmd = use_mmd
-#         self.mmd_coef = mmd_coef
-#         self.kernel_f = self._rbf
-
-#     def _rbf(self, x, y):
-#         x_size = tf.shape(x)[0]
-#         y_size = tf.shape(y)[0]
-#         dim = tf.shape(x)[1]
-#         tiled_x = tf.tile(tf.reshape(x, tf.stack([x_size, 1, dim])),
-#                           tf.stack([1, y_size, 1]))
-
-#         tiled_y = tf.tile(tf.reshape(y, tf.stack([1, y_size, dim])),
-#                           tf.stack([x_size, 1, 1]))
-
-#         return tf.exp(-tf.reduce_mean(tf.square(tiled_x - tiled_y), axis=2) /
-#                       tf.cast(dim, tf.float32))
-
-#     def use_kl_divergence(self, q_mu, q_sigma, p_mu, p_sigma):
-#         r = q_mu - p_mu
-#         kl = self.kl_coef * tf.reduce_mean(
-#             tf.reduce_sum(
-#                 tf.math.log(p_sigma) -
-#                 tf.math.log(q_sigma) -
-#                 .5 * (1. - (q_sigma**2 + r**2) / p_sigma**2), axis=1
-#                 )
-#             )
-
-#         self.add_loss(kl)
-#         self.add_metric(kl, 'mean', 'kl_divergence')
-
-#     def add_mm_discrepancy(self, z, z_prior):
-#         k_prior = self.kernel_f(z_prior, z_prior)
-#         k_post = self.kernel_f(z, z)
-#         k_prior_post = self.kernel_f(z_prior, z)
-#         mmd = tf.reduce_mean(k_prior) + \
-#             tf.reduce_mean(k_post) - \
-#             2 * tf.reduce_mean(k_prior_post)
-
-#         mmd = tf.multiply(self.mmd_coef,  mmd, name='mmd')
-#         self.add_loss(mmd)
-#         self.add_metric(mmd, 'mean', 'mmd_discrepancy')
-
-#     def call(self, inputs):
-#         if self.use_mmd:
-#             z = self.variational(inputs)
-#             z_prior = tfp.distributions.MultivariateNormalDiag(
-#                 self.mu_prior, self.sigma_prior
-#                 ).sample(tf.shape(z)[0])
-#             self.add_mm_discrepancy(z, z_prior)
-
-#         if self.use_kl:
-#             mu = self.mu_layer(inputs)
-#             log_sigma = self.sigma_layer(inputs)
-#             sigma_square = tf.exp(log_sigma)
-#             self.use_kl_divergence(
-#                 mu,
-#                 sigma_square,
-#                 self.mu_prior,
-#                 self.sigma_prior)
-
-#         return z
-
-#     def get_config(self):
-#         base_config = super(NormalVariational, self).get_config()
-#         config = {
-#             'use_kl': self.use_kl,
-#             'use_mmd': self.use_mmd,
-#             'mmd_coef': self.mmd_coef,
-#             'kernel_f': self.kernel_f,
-#         }
-
-#         return dict(list(base_config.items()) + list(config.items()))
 
 class NormalVariational(tf.keras.layers.Layer):
     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
