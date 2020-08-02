@@ -300,8 +300,9 @@ class NormalVariational(tf.keras.layers.Layer):
             self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
 
         if use_mmd is True:
+            self.sigmas = sigmas
             self.kernel_f = functools.partial(
-                self.gaussian_kernel_matrix, sigmas=tf.constant(sigmas)
+                self.gaussian_kernel_matrix, sigmas=tf.constant(self.sigmas)
             )
             self.mmd_coef = mmd_coef
 
@@ -380,6 +381,7 @@ class NormalVariational(tf.keras.layers.Layer):
             'use_mmd': self.use_mmd,
             'mmd_coef': self.mmd_coef,
             'kernel_f': self.kernel_f,
+            'sigmas': self.sigmas,
         }
 
         return dict(list(base_config.items()) + list(config.items()))
