@@ -12,7 +12,7 @@ from VisionEngine.layers.noise_layer import NoiseLayer
 import tensorflow as tf
 
 
-# TODO: #1 abstract encoder/decoder blocks out as custom layers
+# TODO: abstract encoder/decoder blocks out as custom layers
 class Encoder(BaseModel):
     def __init__(self, config):
         super(Encoder, self).__init__(config)
