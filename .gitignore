@@ -31,3 +31,9 @@ report_final/
 report_final_new_gens/
 *.h5
 *.npy
+env/
+report_wppvae/
+report_wppvae_gens/
+
+what.png
+notebooks/.ipynb_checkpoints/
