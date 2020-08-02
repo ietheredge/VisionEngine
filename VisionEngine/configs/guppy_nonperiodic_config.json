@@ -23,7 +23,7 @@
       "n_latents": 4,
       "latent_size": 10,
       "optimizer": "adam",
-      "recon_loss_weight": 1e-2,
+      "recon_loss_weight": 1e-5,
       "use_perceptual_loss": true,
       "perceptual_loss_model": "vgg",
       "pereceptual_loss_layers": ["block1_conv1",
