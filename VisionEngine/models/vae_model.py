@@ -9,104 +9,105 @@ from VisionEngine.base.base_model import BaseModel
 import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
+import functools
 
 import VisionEngine.models.wppvae as wppvae
 
 
-class SqueezeExcite(tf.keras.layers.Layer):
-    def __init__(self, c, r=16, **kwargs):
-        super(SqueezeExcite, self).__init__(**kwargs)
-        self.c = c
-        self.r = r
+# class SqueezeExcite(tf.keras.layers.Layer):
+#     def __init__(self, c, r=16, **kwargs):
+#         super(SqueezeExcite, self).__init__(**kwargs)
+#         self.c = c
+#         self.r = r
 
-    def build(self, input_shape):
-        self.se = tf.keras.Sequential([
-            tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(self.c // self.r, use_bias=False),
-            tf.keras.layers.Activation('relu'),
-            tf.keras.layers.Dense(self.c, use_bias=False),
-            tf.keras.layers.Activation('sigmoid')])
+#     def build(self, input_shape):
+#         self.se = tf.keras.Sequential([
+#             tf.keras.layers.GlobalAveragePooling2D(),
+#             tf.keras.layers.Dense(self.c // self.r, use_bias=False),
+#             tf.keras.layers.Activation('relu'),
+#             tf.keras.layers.Dense(self.c, use_bias=False),
+#             tf.keras.layers.Activation('sigmoid')])
 
-    def call(self, layer_inputs, **kwargs):
-        return self.se(layer_inputs)
+#     def call(self, layer_inputs, **kwargs):
+#         return self.se(layer_inputs)
 
-    def compute_output_shape(self, input_shape):
-        return input_shape
+#     def compute_output_shape(self, input_shape):
+#         return input_shape
 
-    def get_config(self):
-        config = {
-            'c': self.c,
-            'r': self.r
-        }
-        base_config = \
-            super(SqueezeExcite, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+#     def get_config(self):
+#         config = {
+#             'c': self.c,
+#             'r': self.r
+#         }
+#         base_config = \
+#             super(SqueezeExcite, self).get_config()
+#         return dict(list(base_config.items()) + list(config.items()))
 
 
 
-class SpectralNormalization(tf.keras.layers.Wrapper):
-    def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
-        self.iteration = iteration
-        self.eps = eps
-        self.do_power_iteration = training
-        if not isinstance(layer, tf.keras.layers.Layer):
-            raise ValueError(
-                'Please initialize `TimeDistributed` layer with a '
-                '`Layer` instance. You passed: {input}'.format(input=layer))
-        super(SpectralNormalization, self).__init__(layer, **kwargs)
+# class SpectralNormalization(tf.keras.layers.Wrapper):
+#     def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
+#         self.iteration = iteration
+#         self.eps = eps
+#         self.do_power_iteration = training
+#         if not isinstance(layer, tf.keras.layers.Layer):
+#             raise ValueError(
+#                 'Please initialize `TimeDistributed` layer with a '
+#                 '`Layer` instance. You passed: {input}'.format(input=layer))
+#         super(SpectralNormalization, self).__init__(layer, **kwargs)
 
-    def build(self, input_shape):
-        self.layer.build(input_shape)
+#     def build(self, input_shape):
+#         self.layer.build(input_shape)
 
-        self.w = self.layer.kernel
-        self.w_shape = self.w.shape.as_list()
+#         self.w = self.layer.kernel
+#         self.w_shape = self.w.shape.as_list()
 
-        self.v = self.add_weight(shape=(1, self.w_shape[0] * self.w_shape[1] * self.w_shape[2]),
-                                 initializer=tf.initializers.TruncatedNormal(stddev=0.02),
-                                 trainable=False,
-                                 name='sn_v',
-                                 dtype=tf.float32)
+#         self.v = self.add_weight(shape=(1, self.w_shape[0] * self.w_shape[1] * self.w_shape[2]),
+#                                  initializer=tf.initializers.TruncatedNormal(stddev=0.02),
+#                                  trainable=False,
+#                                  name='sn_v',
+#                                  dtype=tf.float32)
 
-        self.u = self.add_weight(shape=(1, self.w_shape[-1]),
-                                 initializer=tf.initializers.TruncatedNormal(stddev=0.02),
-                                 trainable=False,
-                                 name='sn_u',
-                                 dtype=tf.float32)
+#         self.u = self.add_weight(shape=(1, self.w_shape[-1]),
+#                                  initializer=tf.initializers.TruncatedNormal(stddev=0.02),
+#                                  trainable=False,
+#                                  name='sn_u',
+#                                  dtype=tf.float32)
 
-        super(SpectralNormalization, self).build()
+#         super(SpectralNormalization, self).build()
 
-    def call(self, inputs):
-        self.update_weights()
-        output = self.layer(inputs)
-        self.restore_weights()  # Restore weights because of this formula "W = W - alpha * W_SN`"
-        return output
+#     def call(self, inputs):
+#         self.update_weights()
+#         output = self.layer(inputs)
+#         self.restore_weights()  # Restore weights because of this formula "W = W - alpha * W_SN`"
+#         return output
     
-    def update_weights(self):
-        w_reshaped = tf.reshape(self.w, [-1, self.w_shape[-1]])
+#     def update_weights(self):
+#         w_reshaped = tf.reshape(self.w, [-1, self.w_shape[-1]])
         
-        u_hat = self.u
-        v_hat = self.v  # init v vector
+#         u_hat = self.u
+#         v_hat = self.v  # init v vector
 
-        if self.do_power_iteration:
-            for _ in range(self.iteration):
-                v_ = tf.matmul(u_hat, tf.transpose(w_reshaped))
-                v_hat = v_ / (tf.reduce_sum(v_**2)**0.5 + self.eps)
+#         if self.do_power_iteration:
+#             for _ in range(self.iteration):
+#                 v_ = tf.matmul(u_hat, tf.transpose(w_reshaped))
+#                 v_hat = v_ / (tf.reduce_sum(v_**2)**0.5 + self.eps)
 
-                u_ = tf.matmul(v_hat, w_reshaped)
-                u_hat = u_ / (tf.reduce_sum(u_**2)**0.5 + self.eps)
+#                 u_ = tf.matmul(v_hat, w_reshaped)
+#                 u_hat = u_ / (tf.reduce_sum(u_**2)**0.5 + self.eps)
 
-        sigma = tf.matmul(tf.matmul(v_hat, w_reshaped), tf.transpose(u_hat))
-        self.u.assign(u_hat)
-        self.v.assign(v_hat)
+#         sigma = tf.matmul(tf.matmul(v_hat, w_reshaped), tf.transpose(u_hat))
+#         self.u.assign(u_hat)
+#         self.v.assign(v_hat)
 
-        self.layer.kernel.assign(self.w / sigma)
+#         self.layer.kernel.assign(self.w / sigma)
 
-    def restore_weights(self):
-        self.layer.kernel.assign(self.w)
+#     def restore_weights(self):
+#         self.layer.kernel.assign(self.w)
 
 
 class PerceptualLossLayer(tf.keras.layers.Layer):
-    def __init__(self, perceptual_loss_model, incoming_activation,
+    def __init__(self, perceptual_loss_model,
                  pereceptual_loss_layers, perceptual_loss_layer_weights,
                  model_input_shape, name, **kwargs):
         super(PerceptualLossLayer, self).__init__(**kwargs)
@@ -115,7 +116,7 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         self.layer_weights = perceptual_loss_layer_weights
         self.model_input_shape = [256, 256, 3]
         self.n_layers = len(pereceptual_loss_layers)
-        self.incoming_activation = incoming_activation
+
 
     def build(self, input_shape):
         if self.loss_model_type == 'vgg':
@@ -143,12 +144,8 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         super(PerceptualLossLayer, self).build(input_shape)
 
     def call(self, layer_inputs, **kwargs):
-        if self.incoming_activation == 'tanh':
-            y_true = layer_inputs[0] * 0.5 + 0.5
-            y_pred = layer_inputs[1] * 0.5 + 0.5
-        else:
-            y_true = layer_inputs[0]
-            y_pred = layer_inputs[1]
+        y_true = layer_inputs[0]
+        y_pred = layer_inputs[1]
 
         y_true = tf.keras.applications.vgg19.preprocess_input(
             y_true*255.0)
@@ -194,37 +191,151 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
             super(PerceptualLossLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+# class NormalVariational(tf.keras.layers.Layer):
+#     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
+#                     use_kl=False, kl_coef=1.0,
+#                     use_mmd=True, mmd_coef=100.0, name=None, **kwargs):
+#         super().__init__(**kwargs)
+#         self.mu_layer = tf.keras.layers.Dense(size)
+#         self.sigma_layer = tf.keras.layers.Dense(size)
+#         if use_kl is True:
+#             self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
+#         self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
+#         self.sigma_prior = tf.constant(
+#             sigma_prior, dtype=tf.float32, shape=(size,)
+#             )
+
+#         self.use_kl = use_kl
+#         self.use_mmd = use_mmd
+#         self.mmd_coef = mmd_coef
+#         self.kernel_f = self._rbf
+        
+
+#     def _rbf(self, x, y):
+#         x_size = tf.shape(x)[0]
+#         y_size = tf.shape(y)[0]
+#         dim = tf.shape(x)[1]
+#         tiled_x = tf.tile(tf.reshape(x, tf.stack([x_size, 1, dim])),
+#                           tf.stack([1, y_size, 1]))
+
+#         tiled_y = tf.tile(tf.reshape(y, tf.stack([1, y_size, dim])),
+#                           tf.stack([x_size, 1, 1]))
+
+#         return tf.exp(-tf.reduce_mean(tf.square(tiled_x - tiled_y), axis=2) /
+#                       tf.cast(dim, tf.float32))
+
+#     def use_kl_divergence(self, q_mu, q_sigma, p_mu, p_sigma):
+#         r = q_mu - p_mu
+#         kl = self.kl_coef * tf.reduce_mean(
+#             tf.reduce_sum(
+#                 tf.math.log(p_sigma) -
+#                 tf.math.log(q_sigma) -
+#                 .5 * (1. - (q_sigma**2 + r**2) / p_sigma**2), axis=1
+#                 )
+#             )
+#         self.add_loss(kl)
+#         self.add_metric(kl, 'mean', 'kl_divergence')
+
+#     def add_mmd_loss(self, z, z_prior):
+#         k_prior = self.kernel_f(z_prior, z_prior)
+#         k_post = self.kernel_f(z, z)
+#         k_prior_post = self.kernel_f(z_prior, z)
+#         mmd = tf.reduce_mean(k_prior) + \
+#             tf.reduce_mean(k_post) - \
+#             2 * tf.reduce_mean(k_prior_post)
+
+#         mmd = tf.multiply(self.mmd_coef,  mmd, name='mmd')
+#         self.add_loss(mmd)
+#         self.add_metric(mmd, 'mean', 'mmd_discrepancy')
+
+#     def call(self, inputs):
+#         if self.use_mmd:
+#             mu = self.mu_layer(inputs)
+#             log_sigma = self.sigma_layer(inputs)
+#             sigma_square = tf.exp(log_sigma * 0.5)
+#             z = mu + (log_sigma * tf.random.normal(shape=tf.shape(sigma_square)))
+#             z_prior = tfp.distributions.MultivariateNormalDiag(
+#                 self.mu_prior, self.sigma_prior
+#                 ).sample(tf.shape(z)[0])
+#             self.add_mmd_loss(z, z_prior)
+
+#         if self.use_kl:
+#             mu = self.mu_layer(inputs)
+#             log_sigma = self.sigma_layer(inputs)
+#             sigma_square = tf.exp(log_sigma * 0.5)
+#             self.use_kl_divergence(
+#                 mu,
+#                 sigma_square,
+#                 self.mu_prior,
+#                 self.sigma_prior)
+
+#         return z
+
+#     def get_config(self):
+#         base_config = super(NormalVariational, self).get_config()
+#         config = {
+#             'use_kl': self.use_kl,
+#             'use_mmd': self.use_mmd,
+#             'mmd_coef': self.mmd_coef,
+#             'kernel_f': self.kernel_f,
+#         }
+
+#         return dict(list(base_config.items()) + list(config.items()))
+
 class NormalVariational(tf.keras.layers.Layer):
     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
-                    use_kl=False, kl_coef=1.0,
-                    use_mmd=True, mmd_coef=100.0, name=None, **kwargs):
+                use_kl=False, kl_coef=1.0, use_mmd=True, 
+                sigmas=[1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20,
+                25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6],  # all the sigmas!
+                mmd_coef=100.0, name=None, **kwargs):
         super().__init__(**kwargs)
+
         self.mu_layer = tf.keras.layers.Dense(size)
         self.sigma_layer = tf.keras.layers.Dense(size)
-        if use_kl is True:
-            self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
-        self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
-        self.sigma_prior = tf.constant(
-            sigma_prior, dtype=tf.float32, shape=(size,)
-            )
 
         self.use_kl = use_kl
         self.use_mmd = use_mmd
-        self.mmd_coef = mmd_coef
-        self.kernel_f = self._rbf
 
-    def _rbf(self, x, y):
-        x_size = tf.shape(x)[0]
-        y_size = tf.shape(y)[0]
-        dim = tf.shape(x)[1]
-        tiled_x = tf.tile(tf.reshape(x, tf.stack([x_size, 1, dim])),
-                          tf.stack([1, y_size, 1]))
+        if use_kl is True:
+            self.kl_coef = tf.Variable(kl_coef, trainable=False, name='kl_coef')
 
-        tiled_y = tf.tile(tf.reshape(y, tf.stack([1, y_size, dim])),
-                          tf.stack([x_size, 1, 1]))
+        if use_mmd is True:
+            self.kernel_f = functools.partial(
+                self.gaussian_kernel_matrix, sigmas=tf.constant(sigmas)
+            )
+            self.mmd_coef = mmd_coef
 
-        return tf.exp(-tf.reduce_mean(tf.square(tiled_x - tiled_y), axis=2) /
-                      tf.cast(dim, tf.float32))
+        self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
+        self.sigma_prior = tf.constant(sigma_prior, dtype=tf.float32, shape=(size,))
+
+    def gaussian_kernel_matrix(self, x, y, sigmas):
+        beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
+        dist = self.compute_pairwise_distances(x, y)
+        s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
+        return tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
+    
+    @staticmethod
+    def compute_pairwise_distances(x, y):
+        if not len(x.get_shape()) == len(y.get_shape()) == 2:
+            raise ValueError('Both inputs should be matrices.')
+        if x.get_shape().as_list()[1] != y.get_shape().as_list()[1]:
+            raise ValueError('The number of features should be the same.')
+        norm = lambda x: tf.reduce_sum(tf.square(x), 1)
+        return tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
+
+    @staticmethod
+    def maximum_mean_discrepancy(x, y, kernel):
+        cost = tf.reduce_mean(kernel(x, x))
+        cost += tf.reduce_mean(kernel(y, y))
+        cost -= 2 * tf.reduce_mean(kernel(x, y))
+        cost = tf.where(cost > 0, cost, 0)
+        return cost
+
+    def add_mmd_loss(self, z, z_prior):
+        mmd = self.maximum_mean_discrepancy(z, z_prior, kernel=self.kernel_f)
+        mmd = tf.maximum(1e-4, mmd) * self.mmd_coef
+        self.add_loss(mmd)
+        self.add_metric(mmd, 'mean', 'mmd_discrepancy')
 
     def use_kl_divergence(self, q_mu, q_sigma, p_mu, p_sigma):
         r = q_mu - p_mu
@@ -238,18 +349,6 @@ class NormalVariational(tf.keras.layers.Layer):
         self.add_loss(kl)
         self.add_metric(kl, 'mean', 'kl_divergence')
 
-    def add_mm_discrepancy(self, z, z_prior):
-        k_prior = self.kernel_f(z_prior, z_prior)
-        k_post = self.kernel_f(z, z)
-        k_prior_post = self.kernel_f(z_prior, z)
-        mmd = tf.reduce_mean(k_prior) + \
-            tf.reduce_mean(k_post) - \
-            2 * tf.reduce_mean(k_prior_post)
-
-        mmd = tf.multiply(self.mmd_coef,  mmd, name='mmd')
-        self.add_loss(mmd)
-        self.add_metric(mmd, 'mean', 'mmd_discrepancy')
-
     def call(self, inputs):
         if self.use_mmd:
             mu = self.mu_layer(inputs)
@@ -259,12 +358,13 @@ class NormalVariational(tf.keras.layers.Layer):
             z_prior = tfp.distributions.MultivariateNormalDiag(
                 self.mu_prior, self.sigma_prior
                 ).sample(tf.shape(z)[0])
-            self.add_mm_discrepancy(z, z_prior)
+            self.add_mmd_loss(z, z_prior)
 
         if self.use_kl:
             mu = self.mu_layer(inputs)
             log_sigma = self.sigma_layer(inputs)
             sigma_square = tf.exp(log_sigma * 0.5)
+            z = mu + (log_sigma * tf.random.normal(shape=tf.shape(sigma_square)))
             self.use_kl_divergence(
                 mu,
                 sigma_square,
@@ -283,7 +383,6 @@ class NormalVariational(tf.keras.layers.Layer):
         }
 
         return dict(list(base_config.items()) + list(config.items()))
-
 
 
 class SaltAndPepper(tf.keras.layers.Layer):
@@ -476,19 +575,19 @@ class Decoder(BaseModel):
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Dense(
                         1024, kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Dense(
                         16*16*512, kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Reshape((16, 16, 512))], name='z_tilde_4')
 
                 z_tilde_4 = z_tilde_4_layers(z_4)
@@ -499,7 +598,7 @@ class Decoder(BaseModel):
                         self.config.model.kernel_l2_regularize))(self.z_3_input)
 
                 z_3 = tf.keras.layers.BatchNormalization()(z_3)
-                z_3 = tf.keras.layers.ReLU()(z_3)
+                z_3 = tf.keras.layers.ReLU(6.)(z_3)
                 z_3 = tf.keras.layers.Reshape((16, 16, 512))(z_3)
                 z_tilde_3_layers = tf.keras.Sequential([
                     tf.keras.layers.Conv2DTranspose(
@@ -508,21 +607,21 @@ class Decoder(BaseModel):
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Conv2DTranspose(
                         256, 4, 2, padding='same',
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Conv2DTranspose(
                         256, 4, 1, padding='same',
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU()], name='z_tilde_3')
+                    tf.keras.layers.ReLU(6.)], name='z_tilde_3')
 
                 input_z_tilde_3 = tf.keras.layers.Concatenate()([z_tilde_4, z_3])
                 z_tilde_3 = z_tilde_3_layers(input_z_tilde_3)
@@ -532,7 +631,7 @@ class Decoder(BaseModel):
                     32*32*256, kernel_regularizer=tf.keras.regularizers.l2(
                         2.5e-5))(self.z_2_input)
                 z_2 = tf.keras.layers.BatchNormalization()(z_2)
-                z_2 = tf.keras.layers.ReLU()(z_2)
+                z_2 = tf.keras.layers.ReLU(6.)(z_2)
                 z_2 = tf.keras.layers.Reshape((32, 32, 256))(z_2)
                 z_tilde_2_layers = tf.keras.Sequential([
                     tf.keras.layers.Conv2DTranspose(
@@ -540,20 +639,20 @@ class Decoder(BaseModel):
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Conv2DTranspose(
                         128, 4, 1, padding='same',
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.ReLU(6.),
                     tf.keras.layers.Conv2DTranspose(
                         64, 4, 2, padding='same',
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
                     tf.keras.layers.BatchNormalization(),
-                    tf.keras.layers.ReLU()], name='z_tilde_2')
+                    tf.keras.layers.ReLU(6.)], name='z_tilde_2')
 
                 input_z_tilde_2 = tf.keras.layers.Concatenate()([z_tilde_3, z_2])
                 z_tilde_2 = z_tilde_2_layers(input_z_tilde_2)
@@ -564,7 +663,7 @@ class Decoder(BaseModel):
                         self.config.model.kernel_l2_regularize))(self.z_1_input)
 
                 z_1 = tf.keras.layers.BatchNormalization()(z_1)
-                z_1 = tf.keras.layers.ReLU()(z_1)
+                z_1 = tf.keras.layers.ReLU(6.)(z_1)
                 z_1 = tf.keras.layers.Reshape((128, 128, 64))(z_1)
                 z_tilde_1_layers = tf.keras.Sequential([
                     tf.keras.layers.Conv2DTranspose(
@@ -616,6 +715,7 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
+                sigmas=self.config.model.sigmas,
                 name='z_1_latent')(self.h_1)
 
         with tf.name_scope('z_2_latent'):
@@ -627,6 +727,7 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
+                sigmas=self.config.model.sigmas,
                 name='z_2_latent')(self.h_2)
 
         with tf.name_scope('z_3_latent'):
@@ -638,6 +739,7 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
+                sigmas=self.config.model.sigmas,
                 name='z_3_latent')(self.h_3)
 
         with tf.name_scope('z_4_latent'):
@@ -649,6 +751,7 @@ class VAEModel(Encoder, Decoder):
                 kl_coef=self.config.model.kl_coef,
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
+                sigmas=self.config.model.sigmas,
                 name='z_4_latent')(self.h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
@@ -1047,6 +1150,7 @@ class VAEModel(Encoder, Decoder):
 #             kl_coef=self.config.model.kl_coef,
 #             use_mmd=self.config.model.use_mmd,
 #             mmd_coef=self.config.model.mmd_coef,
+sigmas=self.config.model.sigmas,
 #             name='z_1_latent')(self.h_1)
 
 #         self.z_2 = NormalVariational(
@@ -1057,6 +1161,7 @@ class VAEModel(Encoder, Decoder):
 #             kl_coef=self.config.model.kl_coef,
 #             use_mmd=self.config.model.use_mmd,
 #             mmd_coef=self.config.model.mmd_coef,
+sigmas=self.config.model.sigmas,
 #             name='z_2_latent')(self.h_2)
 
 #         self.z_3 = NormalVariational(
@@ -1067,6 +1172,7 @@ class VAEModel(Encoder, Decoder):
 #             kl_coef=self.config.model.kl_coef,
 #             use_mmd=self.config.model.use_mmd,
 #             mmd_coef=self.config.model.mmd_coef,
+sigmas=self.config.model.sigmas,
 #             name='z_3_latent')(self.h_3)
 
 #         self.z_4 = NormalVariational(
@@ -1077,6 +1183,7 @@ class VAEModel(Encoder, Decoder):
 #             kl_coef=self.config.model.kl_coef,
 #             use_mmd=self.config.model.use_mmd,
 #             mmd_coef=self.config.model.mmd_coef,
+sigmas=self.config.model.sigmas,
 #             name='z_4_latent')(self.h_4)
 
 #         if self.config.model.use_wppvae is True:

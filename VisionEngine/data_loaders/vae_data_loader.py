@@ -85,6 +85,10 @@ class DataLoader(BaseDataLoader):
         else:
             raise NotImplementedError
 
+        # record the number of samples in the config
+        self.config.data_loader.n_samples = len(list(list_data))
+
+        # preprocess and create train data
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         train_ds = prepare_for_training(ds)
 
