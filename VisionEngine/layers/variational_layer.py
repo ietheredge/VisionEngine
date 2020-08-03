@@ -10,6 +10,28 @@ import tensorflow_probability as tfp
 import functools
 
 
+def gaussian_kernel_matrix(x, y, sigmas):
+    beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
+    dist = compute_pairwise_distances(x, y)
+    s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
+    return tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
+
+def compute_pairwise_distances(x, y): 
+    if not len(x.get_shape()) == len(y.get_shape()) == 2:
+        raise ValueError('Both inputs should be matrices.')
+    if x.get_shape().as_list()[1] != y.get_shape().as_list()[1]:
+        raise ValueError('The number of features should be the same.')
+    norm = lambda x: tf.reduce_sum(tf.square(x), 1)
+    return tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
+
+def maximum_mean_discrepancy(x, y, kernel):
+    cost = tf.reduce_mean(kernel(x, x))
+    cost += tf.reduce_mean(kernel(y, y))
+    cost -= 2 * tf.reduce_mean(kernel(x, y))
+    cost = tf.where(cost > 0, cost, 0)
+    return cost
+
+
 class VariationalLayer(tf.keras.layers.Layer):
     def __init__(self, size=2, mu_prior=0., sigma_prior=1.,
                 use_kl=False, kl_coef=1.0, use_mmd=True, 
@@ -30,38 +52,17 @@ class VariationalLayer(tf.keras.layers.Layer):
         if use_mmd is True:
             self.sigmas = sigmas
             self.kernel_f = functools.partial(
-                self.gaussian_kernel_matrix, sigmas=tf.constant(self.sigmas)
+                gaussian_kernel_matrix, sigmas=tf.constant(self.sigmas)
             )
+            functools.update_wrapper(self.kernel_f, gaussian_kernel_matrix)
+
             self.mmd_coef = mmd_coef
 
         self.mu_prior = tf.constant(mu_prior, dtype=tf.float32, shape=(size,))
         self.sigma_prior = tf.constant(sigma_prior, dtype=tf.float32, shape=(size,))
 
-    def gaussian_kernel_matrix(self, x, y, sigmas):
-        beta = 1. / (2. * (tf.expand_dims(sigmas, 1)))
-        dist = self.compute_pairwise_distances(x, y)
-        s = tf.matmul(beta, tf.reshape(dist, (1, -1)))
-        return tf.reshape(tf.reduce_sum(tf.exp(-s), 0), tf.shape(dist))
-    
-    @staticmethod
-    def compute_pairwise_distances(x, y):
-        if not len(x.get_shape()) == len(y.get_shape()) == 2:
-            raise ValueError('Both inputs should be matrices.')
-        if x.get_shape().as_list()[1] != y.get_shape().as_list()[1]:
-            raise ValueError('The number of features should be the same.')
-        norm = lambda x: tf.reduce_sum(tf.square(x), 1)
-        return tf.transpose(norm(tf.expand_dims(x, 2) - tf.transpose(y)))
-
-    @staticmethod
-    def maximum_mean_discrepancy(x, y, kernel):
-        cost = tf.reduce_mean(kernel(x, x))
-        cost += tf.reduce_mean(kernel(y, y))
-        cost -= 2 * tf.reduce_mean(kernel(x, y))
-        cost = tf.where(cost > 0, cost, 0)
-        return cost
-
     def add_mmd_loss(self, z, z_prior):
-        mmd = self.maximum_mean_discrepancy(z, z_prior, kernel=self.kernel_f)
+        mmd = maximum_mean_discrepancy(z, z_prior, kernel=self.kernel_f)
         mmd = tf.maximum(1e-4, mmd) * self.mmd_coef
         self.add_loss(mmd)
         self.add_metric(mmd, 'mean', 'mmd_discrepancy')

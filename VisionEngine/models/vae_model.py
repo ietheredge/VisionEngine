@@ -19,8 +19,22 @@ class VAEModel(Encoder, Decoder):
         self.make_model()
 
     def make_model(self):
+        """Makes the vlae model. Inherits from Encoder and Decoder classes
+
+        Returns:
+            tf.keras.Model: the compiled vlae model
+        """        
 
         def weighted_reconstruction_loss(x, xhat):
+            """Weighted reconstuction loss
+
+            Args:
+                x (tf.tensor): model input
+                xhat (tf.tensor): reconstructed output
+
+            Returns:
+                tf.float32: weighted reconstruction loss
+            """            
             return self.config.model.recon_loss_weight \
                 * tf.losses.mean_squared_error(
                     tf.keras.layers.Flatten()(x),
@@ -38,11 +52,14 @@ class VAEModel(Encoder, Decoder):
                     ], name='noise_layer')
                 noisy_inputs = noise_layers(self.inputs)
 
+            # encoded noisy samples
             self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(noisy_inputs)
 
         else:
+            # encoded samples
             self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(self.inputs)
 
+        # variational layers
         with tf.name_scope('z_1'):
             self.z_1 = VariationalLayer(
                 size=self.config.model.latent_size,
@@ -92,6 +109,8 @@ class VAEModel(Encoder, Decoder):
                 name='z_4')(self.h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
+
+        # perceptual loss layer
         if self.config.model.use_perceptual_loss is True:
             with tf.name_scope('perceptual_loss'):
                 (_, self.outputs) = PerceptualLossLayer(
@@ -101,11 +120,20 @@ class VAEModel(Encoder, Decoder):
                     model_input_shape=self.config.model.input_shape,
                     name='perceptual_loss')([self.inputs, self.outputs])
 
+        # define and compile the model
         self.model = tf.keras.Model(self.inputs, self.outputs, name='vlae')
         self.model.summary()
         self.model.compile(tf.keras.optimizers.Adam(), weighted_reconstruction_loss)
 
     def load(self, checkpoint_path):
+        """loads model weights from a saved checkpoint
+
+        Args:
+            checkpoint_path (str): file location of save model weights
+
+        Raises:
+            Exception: must build model prior to loading weights
+        """        
         if self.model is None:
             raise Exception("You need to build the model first.")
 
