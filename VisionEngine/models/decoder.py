@@ -26,9 +26,6 @@ class Decoder(BaseModel):
             self.z_tilde_4 = tf.keras.layers.Input(
                 (self.config.model.latent_size,), name='z_tilde_4')
 
-            self.decoder_inputs = [
-                    self.z_tilde_1, self.z_tilde_2, self.z_tilde_3, self.z_tilde_4
-                    ]
 
             # highest hierarchical level
             with tf.name_scope('f_4'):
@@ -158,6 +155,9 @@ class Decoder(BaseModel):
                 f_1_input = tf.keras.layers.Concatenate()([f_2, z_tilde_1])
 
                 self.decoder_outputs = f_1_layers(f_1_input)
+                self.decoder_inputs = [
+                    self.z_tilde_1, self.z_tilde_2, self.z_tilde_3, self.z_tilde_4
+                    ]
 
             # create the decoder model
             self.decoder = tf.keras.Model(

@@ -25,7 +25,7 @@ class KLWarmUp(tf.keras.callbacks.Callback):
         new_coef = self.frange[self.epoch]
         self.epoch += 1
         coefs = [
-            self.model.get_layer(f'z_{i+1}_latent').coef_kl
+            self.model.get_layer(f'z_{i+1}').coef_kl
             for i in range(self.n_latents)
                  ]
 
@@ -73,7 +73,7 @@ class VAETrainer(BaseTrain):
 
         self.callbacks.append(
             tf.keras.callbacks.TensorBoard(
-                log_dir=self.config.callbacks.tensorboard_log_dir,
+                log_dir=os.path.join(os.getenv("VISIONENGINE_HOME"),self.config.callbacks.tensorboard_log_dir),
                 write_graph=self.config.callbacks.tensorboard_write_graph,
                 write_images=self.config.callbacks.tensorboard_write_images,
                 histogram_freq=self.config.callbacks.tensorboard_histogram_freq,

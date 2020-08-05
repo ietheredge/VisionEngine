@@ -14,7 +14,7 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         super(PerceptualLossLayer, self).__init__(**kwargs)
         self.loss_model_type = perceptual_loss_model
         self.layers = pereceptual_loss_layers
-        self.layer_weights = perceptual_loss_layer_weights
+        self.loss_layer_weights = perceptual_loss_layer_weights
         self.model_input_shape = [256, 256, 3]
         self.n_layers = len(pereceptual_loss_layers)
 
@@ -61,12 +61,12 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         self.reconstruction_ = [self.gram_matrix(reconstruction_output)
                                 for reconstruction_output in reconstruction]
 
-        self.perceptual_loss = tf.add_n([tf.reduce_mean((self.reconstruction_[name] - self.sample_[name])**2) 
+        perceptual_loss = tf.add_n([tf.reduce_mean((self.reconstruction_[name] - self.sample_[name])**2) 
                            for name, _ in enumerate(self.reconstruction_)])
-        self.perceptual_loss *= self.layer_weights / self.n_layers
+        perceptual_loss *= self.loss_layer_weights / self.n_layers
 
-        self.add_loss(self.perceptual_loss)
-        self.add_metric(self.perceptual_loss, 'mean', 'perceptual_loss')
+        self.add_loss(perceptual_loss)
+        self.add_metric(perceptual_loss, 'mean', 'perceptual_loss')
 
         return [layer_inputs[0], layer_inputs[1]]
 
@@ -85,7 +85,7 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
             'perceptual_loss_model': self.loss_model_type,
             'pereceptual_loss_layers': self.layers,
             'perceptual_loss_layer_weights':
-                self.layer_weights,
+                self.loss_layer_weights,
             'model_input_shape': self.model_input_shape,
         }
         base_config = \

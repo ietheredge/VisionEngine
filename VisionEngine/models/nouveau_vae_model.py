@@ -4,8 +4,8 @@ Copyright (c) 2020 R. Ian Etheredge All rights reserved.
 This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.
 """
-from VisionEngine.models.encoder import Encoder
-from VisionEngine.models.decoder import Decoder
+from VisionEngine.models.nouveau_encoder import Encoder
+from VisionEngine.models.nouveau_decoder import Decoder
 from VisionEngine.layers.variational_layer import VariationalLayer
 from VisionEngine.layers.perceptual_loss_layer import PerceptualLossLayer
 from VisionEngine.layers.noise_layer import NoiseLayer
