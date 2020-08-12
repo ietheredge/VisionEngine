@@ -15,7 +15,7 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
         self.loss_model_type = perceptual_loss_model
         self.layers = pereceptual_loss_layers
         self.loss_layer_weights = perceptual_loss_layer_weights
-        self.model_input_shape = [256, 256, 3]
+        self.model_input_shape = [256,256,3]
         self.n_layers = len(pereceptual_loss_layers)
 
 
@@ -40,6 +40,8 @@ class PerceptualLossLayer(tf.keras.layers.Layer):
                 [self.loss_model_.input],
                 self.loss_layers,
                 )
+            self.loss_model.trainable = False
+
         else:
             raise NotImplementedError
         super(PerceptualLossLayer, self).build(input_shape)

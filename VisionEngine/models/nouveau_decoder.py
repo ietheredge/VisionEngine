@@ -34,26 +34,28 @@ class Decoder(BaseModel):
                 
                 f_4_layers = tf.keras.Sequential([
                     tf.keras.layers.UpSampling2D(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         2048,
                         kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
-                        1024,
-                        kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         1024,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
+                        1024,
+                        kernel_size=3,
+                        padding='same'),
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
                         512,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU()], name='f_4')
                 f_4 = f_4_layers(z_tilde_4)
@@ -65,26 +67,28 @@ class Decoder(BaseModel):
 
                 f_3_layers = tf.keras.Sequential([
                     tf.keras.layers.UpSampling2D(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         512,
                         kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
-                        256,
-                        kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         256,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
+                        256,
+                        kernel_size=3,
+                        padding='same'),
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
                         128,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU()], name='f_3')
 
@@ -99,26 +103,28 @@ class Decoder(BaseModel):
                                                         
                 f_2_layers = tf.keras.Sequential([
                     tf.keras.layers.UpSampling2D(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         128,
                         kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
-                        64,
-                        kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         64,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
+                        64,
+                        kernel_size=3,
+                        padding='same'),
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
                         32,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU()], name='f_2')
 
@@ -133,30 +139,33 @@ class Decoder(BaseModel):
                 
                 f_1_layers = tf.keras.Sequential([
                     tf.keras.layers.UpSampling2D(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         32,
                         kernel_size=3,
-                        padding='same')),
-                    tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
-                        16,
-                        kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.Conv2D(
                         16,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
+                        16,
+                        kernel_size=3,
+                        padding='same'),
+                    tf.keras.layers.BatchNormalization(),
+                    tf.keras.layers.ReLU(),
+                    tf.keras.layers.Conv2D(
                         8,
                         kernel_size=3,
-                        padding='same')),
+                        padding='same'),
                     tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.ReLU(),
-                    SpectralNormalizationWrapper(tf.keras.layers.Conv2D(
-                        self.config.model.input_shape[2], 3, 1, padding='same')),
+                    tf.keras.layers.Conv2D(
+                        self.config.model.input_shape[2], 3, 1, padding='same'),
+                    tf.keras.layers.BatchNormalization(),
                     tf.keras.layers.Activation('sigmoid')], name='f_1')
 
                 f_1_input = tf.keras.layers.Concatenate()([f_2, z_tilde_1])

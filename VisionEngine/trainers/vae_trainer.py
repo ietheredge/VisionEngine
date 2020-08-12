@@ -115,13 +115,25 @@ class VAETrainer(BaseTrain):
             )
 
     def train(self):
-        self.model.fit(self.data,
-                epochs=self.config.trainer.num_epochs,
-                callbacks=self.callbacks,
-                steps_per_epoch=int(self.config.data_loader.n_samples/self.config.trainer.batch_size)+1,
-                )
-        self.model.save_weights(
-            os.path.join(os.getenv("VISIONENGINE_HOME"),
-                self.config.callbacks.checkpoint_dir,
-                '%s-{epoch:02d}-{loss:.2f}.hdf50' % self.config.exp.name)
-        )
+        self.model.fit(
+            self.data[0],
+            epochs=self.config.trainer.num_epochs,
+            callbacks=self.callbacks,
+            validation_data=self.data[1],
+            steps_per_epoch=int(
+                (1 - self.config.data_loader.validation_split)
+                * self.config.data_loader.n_samples
+                / self.config.trainer.batch_size + 1),
+            validation_steps=int(
+                self.config.data_loader.validation_split
+                * self.config.data_loader.n_samples
+                / self.config.trainer.batch_size + 1),
+            use_multiprocessing=True,
+            )
+
+        # we save the best model during training, don't need this
+        # self.model.save_weights(
+        #     os.path.join(os.getenv("VISIONENGINE_HOME"),
+        #         self.config.callbacks.checkpoint_dir,
+        #         '%s-{epoch:02d}-{loss:.2f}.hdf50' % self.config.exp.name)
+        # )

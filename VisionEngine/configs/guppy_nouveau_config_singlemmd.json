@@ -1,15 +1,16 @@
 {
   "exp": {
-    "name": "butterflies_nouveau"
+    "name": "guppy_nouveau"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
     "folder_loc": "VisionEngine/data_loaders/datasets",
     
-    "dataset": "butterflies",
-    
-    "use_generated": false,
-    "use_real": true,
+    "dataset": "guppies",
+
+    "use_generated": true,
+    "use_real": false,
+
     "augment": false,
     
     "n_samples": 10000,
@@ -37,15 +38,14 @@
     "use_perceptual_loss": true,
     "perceptual_loss_model": "vgg",
     "pereceptual_loss_layers": ["block1_conv1", "block3_conv1", "block5_conv2"],
-    "perceptual_loss_layer_weights": 1e-5,
+    "perceptual_loss_layer_weights": 1e-4,
 
     "mu_prior": 0.0,
     "sigma_prior": 1.0,
 
     "use_mmd": true,
     "mmd_coef": 1e3,
-    "sigmas": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20,
-      25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6],
+    "sigmas": [2e-1],
 
     "use_kl": false,
     "kl_coef": 8.0,

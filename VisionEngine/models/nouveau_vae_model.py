@@ -157,5 +157,5 @@ class VAEModel(Encoder, Decoder):
             raise Exception("You need to build the model first.")
 
         print("Loading model checkpoint {} ...\n".format(checkpoint_path))
-        self.model.load_weights(checkpoint_path)
+        self.model.load_weights(checkpoint_path, by_name=True)
         print("Model loaded")

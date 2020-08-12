@@ -39,7 +39,8 @@ class DataLoader(BaseDataLoader):
             img = tf.image.convert_image_dtype(img, tf.float32)
             img = alpha_blend_decoded_png(img)
             output_img = img
-            if self.config.model.augment is True:
+
+            if self.config.data_loader.augment is True:
                 img, output_img = self.random_jitter(img, output_img)
 
             if self.config.model.final_activation == 'tanh':
@@ -47,14 +48,15 @@ class DataLoader(BaseDataLoader):
 
             return img, output_img
 
-        def prepare_for_training(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
+        def prepare_for_training(ds, cache=self.config.data_loader.cache,
+                                 shuffle=self.config.data_loader.shuffle, shuffle_buffer_size=1000):
             if cache:
                 if isinstance(cache, str):
                     ds = ds.cache(cache)
                 else:
                     ds = ds.cache()
             
-            if self.config.trainer.shuffle:
+            if shuffle:
                 ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
             ds = ds.repeat()
@@ -68,7 +70,7 @@ class DataLoader(BaseDataLoader):
                 if self.config.data_loader.use_generated is True:
                     raise NotImplementedError
                 else:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), seed=42) 
             else:
                 raise NotImplementedError
     
@@ -76,23 +78,31 @@ class DataLoader(BaseDataLoader):
         elif self.config.data_loader.dataset == 'guppies':
             if self.config.data_loader.use_real is True:
                 if self.config.data_loader.use_generated is True:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42)
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), seed=42)
                 else:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), seed=42) 
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), seed=42)
 
         else:
             raise NotImplementedError
 
-        # record the number of samples in the config
+        # overwrite the number of samples in the config
         self.config.data_loader.n_samples = len(list(list_data))
 
-        # preprocess and create train data
+        # preprocess and create dataset
         ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        train_ds = prepare_for_training(ds)
+        
+        # split train and eval
+        train_ds_size = int((1 - self.config.data_loader.validation_split) * self.config.data_loader.n_samples)
+        ds_train = ds.take(train_ds_size)
+        ds_val = ds.skip(train_ds_size)
 
-        return train_ds
+        # prepare splits for training
+        train_ds = prepare_for_training(ds_train)
+        validation_ds = prepare_for_training(ds_val)
+
+        return (train_ds, validation_ds)
 
     def get_test_data(self):
         def alpha_blend_decoded_png(file):
@@ -119,12 +129,16 @@ class DataLoader(BaseDataLoader):
 
             return img, label
 
-        def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
+        def prepare_for_testing(ds, cache=self.config.data_loader.cache,
+                                shuffle=self.config.data_loader.shuffle, shuffle_buffer_size=100):
             if cache:
                 if isinstance(cache, str):
                     ds = ds.cache(cache)
                 else:
                     ds = ds.cache()
+
+            if shuffle:
+                ds = ds.shuffle(shuffle_buffer_size)
 
             ds = ds.batch(self.config.trainer.batch_size)
             ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
@@ -166,12 +180,16 @@ class DataLoader(BaseDataLoader):
             label = tf.strings.split(path, os.path.sep)[-2]
             return img, label
 
-        def prepare_for_testing(ds, cache=self.config.data_loader.cache, shuffle_buffer_size=1000):
+        def prepare_for_testing(ds, cache=self.config.data_loader.cache,
+                                shuffle=self.config.data_loader.shuffle, shuffle_buffer_size=1000):
             if cache:
                 if isinstance(cache, str):
                     ds = ds.cache(cache)
                 else:
                     ds = ds.cache()
+
+            if shuffle:
+                ds = ds.shuffle(shuffle_buffer_size)
 
             return ds
 

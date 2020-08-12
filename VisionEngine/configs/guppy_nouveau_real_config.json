@@ -1,20 +1,25 @@
 {
   "exp": {
-    "name": "guppy_nonperiodic"
+    "name": "guppy_nouveau"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
+    "folder_loc": "VisionEngine/data_loaders/datasets",
+    
     "dataset": "guppies",
 
-    "use_generated": true,
-    "use_real": false,
+    "use_generated": false,
+    "use_real": true,
 
-    "folder_loc": "VisionEngine/data_loaders/datasets",
+    "augment": false,
+    
     "n_samples": 10000,
-    "cache": false
+    "cache": true,
+    "shuffle": true,
+    "validation_split": 0.1
   },
   "model":{
-    "name": "vae_model.VAEModel",
+    "name": "nouveau_vae_model.VAEModel",
     "loadckpt": false,
     "ckpt_path": null,
 
@@ -28,20 +33,18 @@
     "sp_ratio": 0.9,
     "noise_ratio": 0.1,
 
-    "augment": false,
-
-    "recon_loss_weight": 1e3,
+    "recon_loss_weight": 1e5,
 
     "use_perceptual_loss": true,
     "perceptual_loss_model": "vgg",
-    "pereceptual_loss_layers": ["block1_conv1", "block5_conv2"],
-    "perceptual_loss_layer_weights": 1e-6,
+    "pereceptual_loss_layers": ["block1_conv1", "block3_conv1", "block5_conv2"],
+    "perceptual_loss_layer_weights": 1e-5,
 
     "mu_prior": 0.0,
     "sigma_prior": 1.0,
 
     "use_mmd": true,
-    "mmd_coef": 100,
+    "mmd_coef": 1,
     "sigmas": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20,
       25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6],
 
@@ -49,15 +52,14 @@
     "kl_coef": 8.0,
 
     "kernel_l2_regularize": 2.5e-5,
-    "kernel_rnorm_init": 2e-2
+    "kernel_rnorm_init": 2e-2,
+
+    "se_layer_size": [64, 128, 256, 512]
   },
   "trainer":{
     "name": "vae_trainer.VAETrainer",
     "verbose_training": true,
     "batch_size": 16,
-    "validation_split": 0.01,
-
-    "shuffle": true,
 
     "num_epochs": 500,
   
@@ -76,7 +78,7 @@
     "kl_wu_n_iter": 500
   },
   "callbacks":{
-    "checkpoint_monitor": "loss",
+    "checkpoint_monitor": "val_loss",
     "checkpoint_mode": "auto",
     "checkpoint_save_best_only": true,
     "checkpoint_save_weights_only": true,
@@ -84,7 +86,7 @@
     "checkpoint_verbose": true,
     "checkpoint_dir": "checkpoints",
   
-    "save_freq": 100,
+    "save_freq": "epoch",
 
     "use_early_stopping": true,
     "early_stopping_monitor": "loss",

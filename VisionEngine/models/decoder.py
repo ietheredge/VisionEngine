@@ -149,7 +149,7 @@ class Decoder(BaseModel):
                         kernel_regularizer=tf.keras.regularizers.l2(
                             self.config.model.kernel_l2_regularize)),
 
-                    tf.keras.layers.Activation('sigmoid')], name='f_1')
+                    tf.keras.layers.Activation('sigmoid', dtype='float32')], name='f_1')
 
                 # combine variational input with upstream output
                 f_1_input = tf.keras.layers.Concatenate()([f_2, z_tilde_1])

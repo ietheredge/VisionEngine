@@ -19,7 +19,7 @@ class SqueezeExciteLayer(tf.keras.layers.Layer):
             tf.keras.layers.Dense(self.c // self.r, use_bias=False),
             tf.keras.layers.Activation('relu'),
             tf.keras.layers.Dense(self.c, use_bias=False),
-            tf.keras.layers.Activation('sigmoid')])
+            tf.keras.layers.Activation('sigmoid')])  # tanh/relu worsens performance 
 
     def call(self, layer_inputs, **kwargs):
         return self.se(layer_inputs)

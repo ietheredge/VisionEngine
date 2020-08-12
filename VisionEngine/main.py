@@ -5,7 +5,7 @@ from utils import factory
 from dotenv import load_dotenv
 from pathlib import Path
 import sys
-import tensorflow
+import tensorflow as tf
 
 
 def setup_env():
@@ -13,6 +13,7 @@ def setup_env():
     load_dotenv(dotenv_path=env_path)
 
 def main():
+
     # capture the config path from the run arguments
     # then process the json configuration fill
     try:
@@ -36,6 +37,7 @@ def main():
             )(config)
         
         if config.model.loadckpt:
+            print('loading model checkpoint')
             model.load(config.model.ckpt_path)
 
         print('Create the trainer')

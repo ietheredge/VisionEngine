@@ -1,6 +1,6 @@
 {
   "exp": {
-    "name": "butterflies_nouveau"
+    "name": "butterflies_nouveau_mmd_coef_1"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
@@ -43,7 +43,7 @@
     "sigma_prior": 1.0,
 
     "use_mmd": true,
-    "mmd_coef": 1e3,
+    "mmd_coef": 1,
     "sigmas": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20,
       25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6],
 

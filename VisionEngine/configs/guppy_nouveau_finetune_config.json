@@ -1,17 +1,17 @@
 {
   "exp": {
-    "name": "butterflies_nouveau"
+    "name": "guppy_nouveau_finetune"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
-    "folder_loc": "VisionEngine/data_loaders/datasets",
-    
-    "dataset": "butterflies",
-    
+    "dataset": "guppies",
+
     "use_generated": false,
     "use_real": true,
+
     "augment": false,
-    
+
+    "folder_loc": "VisionEngine/data_loaders/datasets",
     "n_samples": 10000,
     "cache": true,
     "shuffle": true,
@@ -19,8 +19,8 @@
   },
   "model":{
     "name": "nouveau_vae_model.VAEModel",
-    "loadckpt": false,
-    "ckpt_path": null,
+    "loadckpt": true,
+    "ckpt_path":  "/home/etheredge/Workspace/VisionEngine/checkpoints/guppy_nouveau_finetune/2020-224-9/guppy_nouveau_finetune.hdf5",
 
     "optimizer": "adam",
 
@@ -63,8 +63,8 @@
     "num_epochs": 500,
   
     "use_lr_scheduler": true,
-    "lr_start": -3,
-    "lr_stop": -5,
+    "lr_start": -4,
+    "lr_stop": -6,
   
     "min_delta": 1e-5,
     "patience": 15,

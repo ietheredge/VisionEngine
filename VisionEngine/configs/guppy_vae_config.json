@@ -1,24 +1,20 @@
 {
   "exp": {
-    "name": "butterflies_nouveau"
+    "name": "guppy_vae"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
+    "dataset": "guppies",
+
+    "use_generated": true,
+    "use_real": false,
+
     "folder_loc": "VisionEngine/data_loaders/datasets",
-    
-    "dataset": "butterflies",
-    
-    "use_generated": false,
-    "use_real": true,
-    "augment": false,
-    
     "n_samples": 10000,
-    "cache": true,
-    "shuffle": true,
-    "validation_split": 0.25
+    "cache": false
   },
   "model":{
-    "name": "nouveau_vae_model.VAEModel",
+    "name": "vae_model.VAEModel",
     "loadckpt": false,
     "ckpt_path": null,
 
@@ -31,6 +27,8 @@
     "denoise": true,
     "sp_ratio": 0.9,
     "noise_ratio": 0.1,
+
+    "augment": false,
 
     "recon_loss_weight": 1e5,
 
@@ -51,19 +49,20 @@
     "kl_coef": 8.0,
 
     "kernel_l2_regularize": 2.5e-5,
-    "kernel_rnorm_init": 2e-2,
-
-    "se_layer_size": [64, 128, 256, 512]
+    "kernel_rnorm_init": 2e-2
   },
   "trainer":{
     "name": "vae_trainer.VAETrainer",
     "verbose_training": true,
     "batch_size": 16,
+    "validation_split": 0.01,
+
+    "shuffle": true,
 
     "num_epochs": 500,
   
     "use_lr_scheduler": true,
-    "lr_start": -3,
+    "lr_start": -4,
     "lr_stop": -5,
   
     "min_delta": 1e-5,
@@ -77,7 +76,7 @@
     "kl_wu_n_iter": 500
   },
   "callbacks":{
-    "checkpoint_monitor": "val_loss",
+    "checkpoint_monitor": "loss",
     "checkpoint_mode": "auto",
     "checkpoint_save_best_only": true,
     "checkpoint_save_weights_only": true,
@@ -85,7 +84,7 @@
     "checkpoint_verbose": true,
     "checkpoint_dir": "checkpoints",
   
-    "save_freq": "epoch",
+    "save_freq": 100,
 
     "use_early_stopping": true,
     "early_stopping_monitor": "loss",
