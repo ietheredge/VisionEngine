@@ -67,7 +67,9 @@
     "lr_stop": -5,
   
     "min_delta": 1e-5,
-    "patience": 15,
+    "patience": 10,
+    "use_early_stopping": true,
+    "early_stopping_monitor": "val_loss",
   
     "use_kl_warmup": false,
     "kl_wu_start": 0.0,
@@ -87,9 +89,6 @@
   
     "save_freq": "epoch",
 
-    "use_early_stopping": true,
-    "early_stopping_monitor": "loss",
-  
     "tensorboard_write_graph": true,
     "tensorboard_write_images": false,
     "tensorboard_historgram_freq": 100,

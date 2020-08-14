@@ -93,12 +93,12 @@ class VAETrainer(BaseTrain):
                 )
             )
 
-        if self.config.callbacks.use_early_stopping is True:
+        if self.config.trainer.use_early_stopping is True:
             self.callbacks.append(
                 tf.keras.callbacks.EarlyStopping(
                     min_delta=self.config.trainer.min_delta,
                     patience=self.config.trainer.patience,
-                    monitor=self.config.callbacks.early_stopping_monitor
+                    monitor=self.config.trainer.early_stopping_monitor
                 )
             )
 

@@ -44,7 +44,7 @@
 
     "use_mmd": true,
     "mmd_coef": 1e3,
-    "sigmas": [1, 1],
+    "sigmas": [1],
 
     "use_kl": false,
     "kl_coef": 8.0,
@@ -66,7 +66,9 @@
     "lr_stop": -5,
   
     "min_delta": 1e-5,
-    "patience": 15,
+    "patience": 10,
+    "use_early_stopping": true,
+    "early_stopping_monitor": "val_loss",
   
     "use_kl_warmup": false,
     "kl_wu_start": 0.0,
@@ -85,9 +87,6 @@
     "checkpoint_dir": "checkpoints",
   
     "save_freq": "epoch",
-
-    "use_early_stopping": true,
-    "early_stopping_monitor": "loss",
   
     "tensorboard_write_graph": true,
     "tensorboard_write_images": false,

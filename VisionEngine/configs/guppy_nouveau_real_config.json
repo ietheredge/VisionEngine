@@ -1,6 +1,6 @@
 {
   "exp": {
-    "name": "guppy_nouveau"
+    "name": "guppy_nouveau_real"
   },
   "data_loader": {
     "name": "vae_data_loader.DataLoader",
@@ -16,7 +16,7 @@
     "n_samples": 10000,
     "cache": true,
     "shuffle": true,
-    "validation_split": 0.1
+    "validation_split": 0.25
   },
   "model":{
     "name": "nouveau_vae_model.VAEModel",
@@ -68,7 +68,7 @@
     "lr_stop": -5,
   
     "min_delta": 1e-5,
-    "patience": 15,
+    "patience": 10,
   
     "use_kl_warmup": false,
     "kl_wu_start": 0.0,

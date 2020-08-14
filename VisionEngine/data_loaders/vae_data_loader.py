@@ -6,35 +6,37 @@ For a copy, see <https://opensource.org/licenses/MIT>.
 """
 from VisionEngine.base.base_data_loader import BaseDataLoader
 
-import numpy as np
 import tensorflow as tf
 import pathlib
 import os
-from skimage.util import random_noise
 
 
 class DataLoader(BaseDataLoader):
     def __init__(self, config):
-        super( DataLoader, self).__init__(config)
-        self.data_dir = pathlib.Path(os.path.join(os.getenv("VISIONENGINE_HOME"),
-            self.config.data_loader.folder_loc,self.config.data_loader.dataset))
+        super(DataLoader, self).__init__(config)
+        self.data_dir = pathlib.Path(
+            os.path.join(
+                os.getenv("VISIONENGINE_HOME"),
+                self.config.data_loader.folder_loc,
+                self.config.data_loader.dataset
+                )
+            )
 
     def get_train_data(self):
         def alpha_blend_decoded_png(file):
-            # alpha blending with a white background 
-            bg = tf.ones((256,256,3))  # change to tf.zeros for a black bg
+            # alpha blending with a white background
+            bg = tf.ones((256, 256, 3))  # change to tf.zeros for a black bg
             r = ((1 - file[:, :, 3]) * bg[:, :, 0]) \
-                    + (file[:, :, 3] * file[:, :, 0])
+                + (file[:, :, 3] * file[:, :, 0])
             g = ((1 - file[:, :, 3]) * bg[:, :, 1]) \
-                    + (file[:, :, 3] * file[:, :, 1])
+                + (file[:, :, 3] * file[:, :, 1])
             b = ((1 - file[:, :, 3]) * bg[:, :, 2]) \
-                    + (file[:, :, 3] * file[:, :, 2])
+                + (file[:, :, 3] * file[:, :, 2])
             rgb = tf.stack([r, g, b], axis=2)
             return rgb
 
         def preprocess_input(path):
             FILE = tf.io.read_file(path)
-            label = tf.strings.split(path, os.path.sep)[-2]
             img = tf.image.decode_png(FILE, channels=0)
             img = tf.image.convert_image_dtype(img, tf.float32)
             img = alpha_blend_decoded_png(img)
@@ -49,13 +51,14 @@ class DataLoader(BaseDataLoader):
             return img, output_img
 
         def prepare_for_training(ds, cache=self.config.data_loader.cache,
-                                 shuffle=self.config.data_loader.shuffle, shuffle_buffer_size=1000):
+                                 shuffle=self.config.data_loader.shuffle,
+                                 shuffle_buffer_size=1000):
             if cache:
                 if isinstance(cache, str):
                     ds = ds.cache(cache)
                 else:
                     ds = ds.cache()
-            
+
             if shuffle:
                 ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
@@ -70,19 +73,27 @@ class DataLoader(BaseDataLoader):
                 if self.config.data_loader.use_generated is True:
                     raise NotImplementedError
                 else:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), seed=42) 
+                    list_data = tf.data.Dataset.list_files(
+                        str(self.data_dir/'*/*'), seed=42
+                    )
             else:
                 raise NotImplementedError
-    
+
         # guppy dataset
         elif self.config.data_loader.dataset == 'guppies':
             if self.config.data_loader.use_real is True:
                 if self.config.data_loader.use_generated is True:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), seed=42)
+                    list_data = tf.data.Dataset.list_files(
+                        str(self.data_dir/'*/*'), seed=42
+                    )
                 else:
-                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), seed=42) 
+                    list_data = tf.data.Dataset.list_files(
+                        str(self.data_dir/'*_*/*'), seed=42
+                    )
             else:
-                list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), seed=42)
+                list_data = tf.data.Dataset.list_files(
+                    str(self.data_dir/'[!a-z][!a-z]/*'), seed=42
+                )
 
         else:
             raise NotImplementedError
@@ -91,10 +102,16 @@ class DataLoader(BaseDataLoader):
         self.config.data_loader.n_samples = len(list(list_data))
 
         # preprocess and create dataset
-        ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        
+        ds = list_data.map(
+            preprocess_input,
+            num_parallel_calls=tf.data.experimental.AUTOTUNE
+        )
+
         # split train and eval
-        train_ds_size = int((1 - self.config.data_loader.validation_split) * self.config.data_loader.n_samples)
+        train_ds_size = int(
+            (1 - self.config.data_loader.validation_split)
+            * self.config.data_loader.n_samples
+        )
         ds_train = ds.take(train_ds_size)
         ds_val = ds.skip(train_ds_size)
 
@@ -106,14 +123,14 @@ class DataLoader(BaseDataLoader):
 
     def get_test_data(self):
         def alpha_blend_decoded_png(file):
-            # alpha blending with a white background 
-            bg = tf.ones((256,256,3))  # if you want black change to tf.zeros
+            # alpha blending with a white background
+            bg = tf.ones((256, 256, 3))  # if you want black change to tf.zeros
             r = ((1 - file[:, :, 3]) * bg[:, :, 0]) \
-                    + (file[:, :, 3] * file[:, :, 0])
+                + (file[:, :, 3] * file[:, :, 0])
             g = ((1 - file[:, :, 3]) * bg[:, :, 1]) \
-                    + (file[:, :, 3] * file[:, :, 1])
+                + (file[:, :, 3] * file[:, :, 1])
             b = ((1 - file[:, :, 3]) * bg[:, :, 2]) \
-                    + (file[:, :, 3] * file[:, :, 2])
+                + (file[:, :, 3] * file[:, :, 2])
             rgb = tf.stack([r, g, b], axis=2)
             return rgb
 
@@ -130,7 +147,8 @@ class DataLoader(BaseDataLoader):
             return img, label
 
         def prepare_for_testing(ds, cache=self.config.data_loader.cache,
-                                shuffle=self.config.data_loader.shuffle, shuffle_buffer_size=100):
+                                shuffle=self.config.data_loader.shuffle,
+                                shuffle_buffer_size=100):
             if cache:
                 if isinstance(cache, str):
                     ds = ds.cache(cache)
@@ -258,7 +276,7 @@ class DataLoader(BaseDataLoader):
         input_image, real_image = self.random_crop(input_image,
             real_image, self.config.model.input_shape[0], self.config.model.input_shape[1])
 
-        if tf.random.uniform(()) > 0.5:
+        if tf.random.uniform((), dtype=tf.float16) > 0.5:
             # random mirroring
             input_image = tf.image.flip_left_right(input_image)
             real_image = tf.image.flip_left_right(real_image)
