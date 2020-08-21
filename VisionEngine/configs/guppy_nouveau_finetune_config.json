@@ -21,7 +21,7 @@
   "model":{
     "name": "nouveau_vae_model.VAEModel",
     "loadckpt": true,
-    "ckpt_path":  "/home/etheredge/Workspace/VisionEngine/checkpoints/guppy_nouveau/2020-225-14/guppy_nouveau.hdf5",
+    "ckpt_path":  "/home/etheredge/Workspace/VisionEngine/checkpoints/guppy_nouveau/2020-228-16/guppy_nouveau.hdf5",
 
     "optimizer": "adam",
 
@@ -59,7 +59,7 @@
   "trainer":{
     "name": "vae_trainer.VAETrainer",
     "verbose_training": true,
-    "batch_size": 16,
+    "batch_size": 8,
 
     "num_epochs": 500,
   
@@ -67,8 +67,8 @@
     "lr_start": -4,
     "lr_stop": -6,
   
-    "min_delta": 1e-5,
-    "patience": 5,
+    "min_delta": 0,
+    "patience": 10,
     "use_early_stopping": true,
     "early_stopping_monitor": "val_loss",
   

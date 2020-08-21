@@ -50,6 +50,22 @@ class DataLoader(BaseDataLoader):
 
             return img, output_img
 
+        def preprocess_input_celeba(path):
+            FILE = tf.io.read_file(path)
+            img = tf.image.decode_jpeg(FILE)
+            img = tf.image.convert_image_dtype(img, tf.float32)
+            img = tf.image.resize_with_pad(img, 256, 256)
+            output_img = img
+
+            if self.config.data_loader.augment is True:
+                img, output_img = self.random_jitter(img, output_img)
+
+            if self.config.model.final_activation == 'tanh':
+                self.normalize(img, output_img)
+
+            return img, output_img
+
+
         def prepare_for_training(ds, cache=self.config.data_loader.cache,
                                  shuffle=self.config.data_loader.shuffle,
                                  shuffle_buffer_size=1000):
@@ -79,6 +95,15 @@ class DataLoader(BaseDataLoader):
             else:
                 raise NotImplementedError
 
+            # overwrite the number of samples in the config
+            self.config.data_loader.n_samples = len(list(list_data))
+
+            # preprocess and create dataset
+            ds = list_data.map(
+                preprocess_input,
+                num_parallel_calls=tf.data.experimental.AUTOTUNE
+            )
+
         # guppy dataset
         elif self.config.data_loader.dataset == 'guppies':
             if self.config.data_loader.use_real is True:
@@ -95,18 +120,38 @@ class DataLoader(BaseDataLoader):
                     str(self.data_dir/'[!a-z][!a-z]/*'), seed=42
                 )
 
+            # overwrite the number of samples in the config
+            self.config.data_loader.n_samples = len(list(list_data))
+
+            # preprocess and create dataset
+            ds = list_data.map(
+                preprocess_input,
+                num_parallel_calls=tf.data.experimental.AUTOTUNE
+            )
+
+        # celeba dataset
+        elif self.config.data_loader.dataset == 'celeba':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), seed=42) 
+            else:
+                raise NotImplementedError
+
+            # overwrite the number of samples in the config
+            self.config.data_loader.n_samples = len(list(list_data))
+
+            # preprocess and create dataset
+            ds = list_data.map(
+                preprocess_input_celeba,
+                num_parallel_calls=tf.data.experimental.AUTOTUNE
+            )
+
         else:
             raise NotImplementedError
 
-        # overwrite the number of samples in the config
-        self.config.data_loader.n_samples = len(list(list_data))
-
-        # preprocess and create dataset
-        ds = list_data.map(
-            preprocess_input,
-            num_parallel_calls=tf.data.experimental.AUTOTUNE
-        )
-
+        
         # split train and eval
         train_ds_size = int(
             (1 - self.config.data_loader.validation_split)
@@ -146,6 +191,18 @@ class DataLoader(BaseDataLoader):
 
             return img, label
 
+        def preprocess_input_celeba(path):
+            FILE = tf.io.read_file(path)
+            img = tf.image.decode_jpeg(FILE)
+            img = tf.image.convert_image_dtype(img, tf.float32)
+            img = tf.image.resize_with_pad(img, 256, 256)
+            LABELFILE = tf.io.read_file(path)
+            label = tf.strings.split(path, os.path.sep)[-2]
+            if self.config.model.final_activation == 'tanh':
+                img, _ = self.normalize(img, None)
+
+            return img, label
+
         def prepare_for_testing(ds, cache=self.config.data_loader.cache,
                                 shuffle=self.config.data_loader.shuffle,
                                 shuffle_buffer_size=100):
@@ -171,6 +228,8 @@ class DataLoader(BaseDataLoader):
                     list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
             else:
                 raise NotImplementedError
+
+            ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     
         # guppy dataset
         elif self.config.data_loader.dataset == 'guppies':
@@ -181,11 +240,25 @@ class DataLoader(BaseDataLoader):
                     list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
             else:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+        
+            ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+        # celeba dataset
+        elif self.config.data_loader.dataset == 'celeba':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
+            else:
+                raise NotImplementedError
+        
+            ds = list_data.map(preprocess_input_celeba, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         else:
             raise NotImplementedError
         
-        ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        
         test_ds = prepare_for_testing(ds)
 
         return test_ds
@@ -196,6 +269,17 @@ class DataLoader(BaseDataLoader):
             FILE = tf.io.read_file(path)
             img = tf.image.decode_png(FILE)
             label = tf.strings.split(path, os.path.sep)[-2]
+            return img, label
+
+        def preprocess_input_celeba(path):
+            FILE = tf.io.read_file(path)
+            img = tf.image.decode_jpeg(FILE)
+            img = tf.image.convert_image_dtype(img, tf.float32)
+            img = tf.image.resize_with_pad(img, 256, 256)
+            label = tf.strings.split(path, os.path.sep)[-2]
+            if self.config.model.final_activation == 'tanh':
+                img, _ = self.normalize(img, None)
+
             return img, label
 
         def prepare_for_testing(ds, cache=self.config.data_loader.cache,
@@ -220,6 +304,8 @@ class DataLoader(BaseDataLoader):
                     list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
             else:
                 raise NotImplementedError
+
+            ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     
         # guppy dataset
         elif self.config.data_loader.dataset == 'guppies':
@@ -230,11 +316,24 @@ class DataLoader(BaseDataLoader):
                     list_data = tf.data.Dataset.list_files(str(self.data_dir/'*_*/*'), shuffle=False, seed=42) 
             else:
                 list_data = tf.data.Dataset.list_files(str(self.data_dir/'[!a-z][!a-z]/*'), shuffle=False, seed=42)
+        
+            ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+        # celeba dataset
+        elif self.config.data_loader.dataset == 'celeba':
+            if self.config.data_loader.use_real is True:
+                if self.config.data_loader.use_generated is True:
+                    raise NotImplementedError
+                else:
+                    list_data = tf.data.Dataset.list_files(str(self.data_dir/'*/*'), shuffle=False, seed=42) 
+            else:
+                raise NotImplementedError
+        
+            ds = list_data.map(preprocess_input_celeba, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         else:
             raise NotImplementedError
         
-        ds = list_data.map(preprocess_input, num_parallel_calls=tf.data.experimental.AUTOTUNE)
         plot_ds = prepare_for_testing(ds)
         return plot_ds
 

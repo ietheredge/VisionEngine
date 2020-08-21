@@ -7,9 +7,10 @@
     "folder_loc": "VisionEngine/data_loaders/datasets",
     
     "dataset": "butterflies",
-    
+
     "use_generated": false,
     "use_real": true,
+    
     "augment": false,
     
     "n_samples": 10000,

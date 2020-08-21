@@ -4,9 +4,7 @@ notebooks/.ibynb_checkpoints
 .ibynb_checkpoints/
 .vscode/
 VisionEngine.egg-info/
-VisionEngine/data_loaders/datasets/butterflies
-VisionEngine/data_loaders/datasets/guppies
-VisionEngine/data_loaders/datasets/*.npz
+VisionEngine/data_loaders/datasets/
 *.pyc
 dist/
 build/
@@ -36,3 +34,6 @@ report_wppvae_gens/
 *.png
 notebooks/.ipynb_checkpoints/
 notebooks/*.png
+*.pdf
+*.jpg
+*.p
