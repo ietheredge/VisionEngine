@@ -1,4 +1,8 @@
-# VisionEngine
+# Decontextualized learning for interpretable hierarchical representations of visual patterns
+
+
+
+# DHRL/VisionEngine
 
 ![](../assets/Overview.png?raw=true)
 
@@ -29,52 +33,68 @@ To start training with one of the [config files](https://github.com/ietheredge/V
 ```bash
 python main.py -c configs/guppy_vae_config.json
 ```
-If you'd like to use your own data, create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. 
+If you'd like to use your own data, create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md) for setting up your own datasets. 
 
 # Repository Structure
 ```bash
 .
-├── checkpoints
-├── data
-│   └── processed
 ├── LICENSE
+├── README.md
+├── VisionEngine
+│   ├── __init__.py
+│   ├── base
+│   │   ├── __init__.py
+│   │   ├── base_data_loader.py
+│   │   ├── base_model.py
+│   │   └── base_trainer.py
+│   ├── configs
+│   │   ├── butterfly_vae_config.json
+│   │   ├── celeba_vae_config.json
+│   │   └── guppy_vae_config.json
+│   ├── data_loaders
+│   │   ├── __init__.py
+│   │   ├── dataset
+│   │   ├── datasets
+│   │   │   ├── README.md
+│   │   │   ├── __init__.py
+│   │   │   ├── butterflies.py
+│   │   │   ├── celeba.py
+│   │   │   └── guppies.py
+│   │   └── vae_data_loader.py
+│   ├── extensions
+│   │   ├── feature_attribution.py
+│   │   └── latent_evolution.py
+│   ├── layers
+│   │   ├── __init__.py
+│   │   ├── noise_layer.py
+│   │   ├── perceptual_loss_layer.py
+│   │   ├── spectral_normalization_wrapper.py
+│   │   ├── squeeze_excite_layer.py
+│   │   └── variational_layer.py
+│   ├── main.py
+│   ├── tests
+│   │   └── variational_layer_test.py
+│   ├── trainers
+│   │   ├── __init__.py
+│   │   ├── gan_trainer.py
+│   │   └── vae_trainer.py
+│   └── utils
+│       ├── __init__.py
+│       ├── args.py
+│       ├── config.py
+│       ├── dirs.py
+│       ├── disentanglement_score.py
+│       ├── eval.py
+│       ├── factory.py
+│       ├── perceptual_loss.py
+│       └── plotting.py
+├── checkpoints
+├── environment.yml
 ├── logs
 ├── notebooks
-├── README.md
-├── report
-│   ├── figures
-│   └── VisionEngine.pdf
+│   ├── EvaluateAndCompareModels.ipynb
+│   ├── EvolveSamples.ipynb
+│   └── FeatureAttribution.ipynb
 ├── requirements.txt
-├── setup.py
-└── VisionEngine
-    ├── base
-    │   ├── base_data_loader.py
-    │   ├── base_model.py
-    │   └── base_trainer.py
-    ├── configs
-    │   ├── butterfly_vae_config.json
-    │   └── guppy_vae_config.json
-    ├── data_loaders
-    │   ├── butterfly_gan_data_loader.py
-    │   ├── butterfly_vae_data_loader.py
-    │   ├── guppy_gan_data_loader.py
-    │   ├── guppy_vae_data_loader.py
-    │   └── __init__.py
-    ├── __init__.py
-    ├── logs
-    ├── main.py
-    ├── models
-    │   ├── gan_model.py
-    │   └── vae_model.py
-    ├── trainers
-    │   ├── gan_trainer.py
-    │   └── vae_trainer.py
-    ├── utils
-    │   ├── args.py
-    │   ├── config.py
-    │   ├── dirs.py
-    │   ├── factory.py
-    │   └── utils.py
-    └── visualization
-        └── visualize.py
+└── setup.py
 ```
