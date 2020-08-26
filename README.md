@@ -1,6 +1,6 @@
 # VisionEngine
 
-![](../assets/VisionEngine.gif?raw=true)
+![](../assets/Overview.png?raw=true)
 
 Welcome to the repository for the framework presented in **VisionEngine, investigating natural color-patterns with machine learning**. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
 
