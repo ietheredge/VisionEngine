@@ -1,8 +1,9 @@
 # DHRL-VisionEngine
 
-![](../assets/Overview.png?raw=true)
+The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns**. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
 
-Welcome to the repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns**. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
+
+![](../assets/Overview.png?raw=true)
 
 # Getting setup
 We recommend creating a virtual environment to run VisionEngine using [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
