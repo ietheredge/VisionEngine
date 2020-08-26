@@ -349,7 +349,7 @@ class DataLoader(BaseDataLoader):
             return input_image, real_image   
 
     @staticmethod
-    def resize(input_image, real_image, height, width):
+    def resize(input_image, real_image, height=256, width=256):
         input_image = tf.image.resize(input_image, [height, width], 
             method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
 
