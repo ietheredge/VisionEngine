@@ -27,13 +27,16 @@ $ python setup.py install
 ```
 
 # Raw data and trained models
+
 All neceassary data files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3).
 *Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders but you *will* need to put the downloaded model checkpoints [here](https://github.com/ietheredge/VisionEngine/tree/master/checkpoints) to verify results.
 
 # Evaluation
+
 We provide three notebooks to evaluate trained models, visualize feature attributions and perform an evolutionary experiment [here](https://github.com/ietheredge/VisionEngine/tree/master/notebooks).
 
 # Training a model from scratch
+
 To start training a model, use one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs): 
 
 ```bash
@@ -47,9 +50,11 @@ $ tensorboard --logdir logs --bind_all
 ```
 
 # Using your own data
+
 If you'd like to use your own data, make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset should be placed in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets). Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md). Then create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs). Finally, reinstall VisionEngine.
 
 # Repository Structure
+
 ```bash
 .
 ├── LICENSE
