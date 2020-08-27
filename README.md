@@ -1,80 +1,113 @@
-# VisionEngine
+# DHRL-VisionEngine
 
-![](../assets/VisionEngine.gif?raw=true)
+The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
 
-Welcome to the repository for the framework presented in **VisionEngine, investigating natural color-patterns with machine learning**. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
+![](../assets/Overview.png?raw=true)`
 
 # Getting setup
-We recommend creating a virtual environment to run VisionEngine using [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
+We recommend creating a virtual environment to run VisionEngine using [anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
 
-Once Anaconda is installed, run:
-```bash
-conda env -n VisionEngine tensorflow-gpu
-```
-Then, to get VisionEngine, run: 
-```bash
-conda activate VisionEngine
-git clone https://github.com/ietheredge/VisionEngine
-cd VisionEngine
-conda install --yes --file requirements.txt
-python setup.py install
-```
-If you do not wish to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link at the top of each notebook.
+Once anaconda/miniconda is installed, download VisionEngine and enter the HOME directory:
 
-# Raw data availability
-The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch and using the provided notebook the required datasets will be automatically downloaded via the dataloaders, so you do not need to do anything.
+```bash
+$ git clone https://github.com/ietheredge/VisionEngine
+$ cd VisionEngine
+```
+
+Set up the environment: 
+- export an .env filewith the VISIONENGINE_HOME variable
+- create the conda environment
+- install the VisionEngine package in the environment
+
+```bash
+$ VISIONENGINE_HOME=$(pwd); echo VISIONENGINE_HOME = $VISIONENGINE_HOME > .env
+$ conda env create -f environment.yml
+$ conda activate visionengine
+$ python setup.py install
+```
+
+# Raw data and trained models
+All neceassary data files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3).
+*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders. You *do* need the pretrained models to verify results. Place the downloaded model checkpoints in the checkpoints directory (or adjust notebooks accordingly)
+
+# Evaluation
+We provide three notebooks to evaluate trained models, visualize feature attributions and perform an evolutionary experiment [here](https://github.com/ietheredge/VisionEngine/tree/master/notebooks).
 
 # Training a model from scratch
-To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
+To start training a model, use one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs): 
+
 ```bash
-python main.py -c configs/guppy_vae_config.json
+$ python main.py -c configs/guppy_vae_config.json
 ```
-If you'd like to use your own data, create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. 
+
+Use tensorboard to observe training progress:
+
+```bash
+$ tensorboard --logdir logs --bind_all
+```
+
+# Using your own data
+If you'd like to use your own data, make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md) for setting up your own datasets. Then create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and 
 
 # Repository Structure
 ```bash
 .
-├── checkpoints
-├── data
-│   └── processed
 ├── LICENSE
+├── README.md
+├── VisionEngine
+│   ├── __init__.py
+│   ├── base
+│   │   ├── __init__.py
+│   │   ├── base_data_loader.py
+│   │   ├── base_model.py
+│   │   └── base_trainer.py
+│   ├── configs
+│   │   ├── _example_config.json
+│   │   ├── butterflies_config.json
+│   │   ├── generated_guppies_config.json
+│   │   ├── guppies_config.json
+│   │   └── guppies_DHRL_config.json
+│   ├── data_loaders
+│   │   ├── __init__.py
+│   │   ├── dataset
+│   │   ├── datasets
+│   │   │   ├── README.md
+│   │   │   ├── __init__.py
+│   │   │   ├── butterflies.py
+│   │   │   └── guppies.py
+│   │   └── data_loader.py
+│   ├── extensions
+│   │   ├── feature_attribution.py
+│   │   └── latent_evolution.py
+│   ├── layers
+│   │   ├── __init__.py
+│   │   ├── noise_layer.py
+│   │   ├── perceptual_loss_layer.py
+│   │   ├── spectral_normalization_wrapper.py
+│   │   ├── squeeze_excite_layer.py
+│   │   └── variational_layer.py
+│   ├── main.py
+│   ├── tests
+│   │   └── variational_layer_test.py
+│   ├── trainers
+│   │   ├── __init__.py
+│   │   └── trainer.py
+│   └── utils
+│       ├── __init__.py
+│       ├── args.py
+│       ├── config.py
+│       ├── dirs.py
+│       ├── disentanglement_score.py
+│       ├── eval.py
+│       ├── factory.py
+│       ├── perceptual_loss.py
+│       └── plotting.py
+├── checkpoints
+├── environment.yml
 ├── logs
 ├── notebooks
-├── README.md
-├── report
-│   ├── figures
-│   └── VisionEngine.pdf
-├── requirements.txt
-├── setup.py
-└── VisionEngine
-    ├── base
-    │   ├── base_data_loader.py
-    │   ├── base_model.py
-    │   └── base_trainer.py
-    ├── configs
-    │   ├── butterfly_vae_config.json
-    │   └── guppy_vae_config.json
-    ├── data_loaders
-    │   ├── butterfly_gan_data_loader.py
-    │   ├── butterfly_vae_data_loader.py
-    │   ├── guppy_gan_data_loader.py
-    │   ├── guppy_vae_data_loader.py
-    │   └── __init__.py
-    ├── __init__.py
-    ├── logs
-    ├── main.py
-    ├── models
-    │   ├── gan_model.py
-    │   └── vae_model.py
-    ├── trainers
-    │   ├── gan_trainer.py
-    │   └── vae_trainer.py
-    ├── utils
-    │   ├── args.py
-    │   ├── config.py
-    │   ├── dirs.py
-    │   ├── factory.py
-    │   └── utils.py
-    └── visualization
-        └── visualize.py
+│   ├── EvaluateAndCompareModels.ipynb
+│   ├── EvolveSamples.ipynb
+│   └── FeatureAttribution.ipynb
+└── setup.py
 ```

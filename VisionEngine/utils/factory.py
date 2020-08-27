@@ -11,7 +11,7 @@ def create(cls):
         print('getattr '+class_name)
         cls_instance = getattr(somemodule, class_name)
     except Exception as err:
-        print("Creating directories error: {0}".format(err))
+        print("Project factory error: {0} in {1}.{2}".format(err, module_name, class_name))
         exit(-1)
 
     return cls_instance
