@@ -28,7 +28,7 @@ $ python setup.py install
 
 # Raw data and trained models
 All neceassary data files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3).
-*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders. You *do* need the pretrained models to verify results. Place the downloaded model checkpoints in the checkpoints directory (or adjust notebooks accordingly)
+*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders. To verify results, you will need to put the downloaded model checkpoints [here](https://github.com/ietheredge/VisionEngine/tree/master/checkpoints).
 
 # Evaluation
 We provide three notebooks to evaluate trained models, visualize feature attributions and perform an evolutionary experiment [here](https://github.com/ietheredge/VisionEngine/tree/master/notebooks).
