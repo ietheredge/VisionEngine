@@ -1,9 +1,11 @@
 # DHRL-VisionEngine
 
-The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns**. Read the complete report [here](https://github.com/ietheredge/VisionEngine/tree/master/report/VisionEngine.pdf).
+The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns**. 
+
+[10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
 
 
-![](../assets/Overview.png?raw=true)
+![](../assets/Overview.png?raw=true)`
 
 # Getting setup
 We recommend creating a virtual environment to run VisionEngine using [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
@@ -23,7 +25,9 @@ python setup.py install
 If you do not wish to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link at the top of each notebook.
 
 # Raw data availability
-The raw files and processed outputs can be accessed [here](https://owncloud.gwdg.de/index.php/s/6lpgoCEDpxlOuUq). For training a model from scratch and using the provided notebook the required datasets will be automatically downloaded via the dataloaders, so you do not need to do anything.
+The raw files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3). Adjust the config file to indicate the file location of the trained model. 
+
+For training a model using the provided scripts, the required datasets will be automatically downloaded via the dataloaders, so you do not need to do anything.
 
 # Training a model from scratch
 To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
