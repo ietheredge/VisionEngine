@@ -1,40 +1,53 @@
 # DHRL-VisionEngine
 
-The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns**. 
-
-[10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
-
+The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
 
 ![](../assets/Overview.png?raw=true)`
 
 # Getting setup
-We recommend creating a virtual environment to run VisionEngine using [Anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
+We recommend creating a virtual environment to run VisionEngine using [anaconda](https://docs.anaconda.com/anaconda/user-guide/getting-started/?gclid=EAIaIQobChMIi5mM5-Hd5wIVhsjeCh1B_AheEAAYASAAEgJ-8PD_BwE).
 
-Once Anaconda is installed, run:
+Once anaconda/miniconda is installed, download VisionEngine and enter the HOME directory:
+
 ```bash
-conda env -n VisionEngine tensorflow-gpu
+$ git clone https://github.com/ietheredge/VisionEngine
+$ cd VisionEngine
 ```
-Then, to get VisionEngine, run: 
+
+Set up the environment: 
+- export an .env filewith the VISIONENGINE_HOME variable
+- create the conda environment
+- install the VisionEngine package in the environment
+
 ```bash
-conda activate VisionEngine
-git clone https://github.com/ietheredge/VisionEngine
-cd VisionEngine
-conda install --yes --file requirements.txt
-python setup.py install
+$ VISIONENGINE_HOME=$(pwd); echo VISIONENGINE_HOME = $VISIONENGINE_HOME > .env
+$ conda env create -f environment.yml
+$ conda activate visionengine
+$ python setup.py install
 ```
-If you do not wish to install VisionEngine locally, feel free to run the provided [notebooks](https://github.com/ietheredge/VisionEngine/tree/master/notebooks) via google colab by clicking the link at the top of each notebook.
 
-# Raw data availability
-The raw files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3). Adjust the config file to indicate the file location of the trained model. 
+# Raw data and trained models
+All neceassary data files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3).
+*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders. You *do* need the pretrained models to verify results. Place the downloaded model checkpoints in the checkpoints directory (or adjust notebooks accordingly)
 
-For training a model using the provided scripts, the required datasets will be automatically downloaded via the dataloaders, so you do not need to do anything.
+# Evaluation
+We provide three notebooks to evaluate trained models, visualize feature attributions and perform an evolutionary experiment [here](https://github.com/ietheredge/VisionEngine/tree/master/notebooks).
 
 # Training a model from scratch
-To start training with one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) run, e.g.: 
+To start training a model, use one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs): 
+
 ```bash
-python main.py -c configs/guppy_vae_config.json
+$ python main.py -c configs/guppy_vae_config.json
 ```
-If you'd like to use your own data, create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md) for setting up your own datasets. 
+
+Use tensorboard to observe training progress:
+
+```bash
+$ tensorboard --logdir logs --bind_all
+```
+
+# Using your own data
+If you'd like to use your own data, make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset python files should be place in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets) along with any required local data. Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md) for setting up your own datasets. Then create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs) and 
 
 # Repository Structure
 ```bash
@@ -49,9 +62,11 @@ If you'd like to use your own data, create a new config file and make the approp
 │   │   ├── base_model.py
 │   │   └── base_trainer.py
 │   ├── configs
-│   │   ├── butterfly_vae_config.json
-│   │   ├── celeba_vae_config.json
-│   │   └── guppy_vae_config.json
+│   │   ├── _example_config.json
+│   │   ├── butterflies_config.json
+│   │   ├── generated_guppies_config.json
+│   │   ├── guppies_config.json
+│   │   └── guppies_DHRL_config.json
 │   ├── data_loaders
 │   │   ├── __init__.py
 │   │   ├── dataset
@@ -59,9 +74,8 @@ If you'd like to use your own data, create a new config file and make the approp
 │   │   │   ├── README.md
 │   │   │   ├── __init__.py
 │   │   │   ├── butterflies.py
-│   │   │   ├── celeba.py
 │   │   │   └── guppies.py
-│   │   └── vae_data_loader.py
+│   │   └── data_loader.py
 │   ├── extensions
 │   │   ├── feature_attribution.py
 │   │   └── latent_evolution.py
@@ -77,8 +91,7 @@ If you'd like to use your own data, create a new config file and make the approp
 │   │   └── variational_layer_test.py
 │   ├── trainers
 │   │   ├── __init__.py
-│   │   ├── gan_trainer.py
-│   │   └── vae_trainer.py
+│   │   └── trainer.py
 │   └── utils
 │       ├── __init__.py
 │       ├── args.py
@@ -96,6 +109,5 @@ If you'd like to use your own data, create a new config file and make the approp
 │   ├── EvaluateAndCompareModels.ipynb
 │   ├── EvolveSamples.ipynb
 │   └── FeatureAttribution.ipynb
-├── requirements.txt
 └── setup.py
 ```

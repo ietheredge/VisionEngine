@@ -5,8 +5,11 @@ from PIL import Image
 from itertools import product
 import math
 import os
+import tqdm
+import tensorflow as tf
 from pathlib import Path 
 
+plt.rcParams['pdf.use14corefonts'] = True
 
 def imscatter(x, y, image, ax=None, zoom=1):
     if ax is None:
@@ -129,17 +132,23 @@ def plot_img_attributions(image,
     plt.tight_layout()
     return fig
 
-def plot_overlay(image,
-                 attribution_mask,
-                 H=0,
-                 z_i=0,
-                 cmap=None,
-                 overlay_alpha=0.4):
 
-    fig, axs = plt.subplots(nrows=1, ncols=1, squeeze=False, figsize=(4, 4))
-    axs[0, 0].set_title(f'Overlay: {H}, {z_i}')
-    axs[0, 0].imshow(attribution_mask, cmap=cmap)
-    axs[0, 0].imshow(image, alpha=overlay_alpha)
-    axs[0, 0].axis('off')
-    plt.tight_layout()
-    return fig
+def visualize_generation(generation, parent_record, BATCH_SIZE = 1):
+    i = 5
+    j = i
+    image_container = Image.new('RGB', (256*i,256*j))
+    x_hat = []
+    subsample = parent_record[generation][:i*j]
+
+    ds = tf.data.Dataset.from_tensor_slices(subsample).batch(BATCH_SIZE).prefetch(tf.data.experimental.AUTOTUNE)
+    
+    for batch in tqdm.tqdm_notebook(ds, desc='generating'):
+        batch = tf.reshape(batch, (4, BATCH_SIZE, 10))
+        x_hat.extend(model.decoder([batch[0], batch[1], batch[2], batch[3]]))
+    x_hat = tf.reshape(tf.Variable(x_hat), (i,j,256,256,3))
+    
+    for (k, l) in tqdm.tqdm_notebook(product(range(i),repeat=2), desc='plotting'):
+        sample = x_hat.numpy()[k,l,:]
+        img = 255 * sample
+        img = img.astype(np.uint8)
+        image_container.paste(Image.fromarray(img.astype('uint8')), (k*256, l*256))

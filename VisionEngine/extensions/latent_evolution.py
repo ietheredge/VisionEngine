@@ -1,5 +1,5 @@
 import tensorflow as tf
-import tqdm._utils
+import tqdm
 
 def evolve_population(
     parents, model, parents_orig, temperature=0.2, persistence=0.5,

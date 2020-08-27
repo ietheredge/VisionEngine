@@ -2,27 +2,19 @@ from sklearn.linear_model import Lasso
 import numpy as np
 
 def norm_entropy(p):
-    '''p: probabilities '''
     n = p.shape[0]
     return - p.dot(np.log(p + 1e-12) / np.log(n + 1e-12))
 def entropic_scores(r):
-    '''r: relative importances '''
     r = np.abs(r)
-    ps = r / np.sum(r, axis=0) # 'probabilities'
+    ps = r / np.sum(r, axis=0)
     hs = [1-norm_entropy(p) for p in ps.T]
     return hs
-def mse(predicted, target):
-    ''' mean square error '''
+def nrmse(predicted, target):
     predicted = predicted[:, None] if len(predicted.shape) == 1 else predicted #(n,)->(n,1)
     target = target[:, None] if len(target.shape) == 1 else target #(n,)->(n,1)
     err = predicted - target
     err = err.T.dot(err) / len(err)
-    return err[0, 0] #value not array
-def rmse(predicted, target):
-    ''' root mean square error '''
-    return np.sqrt(mse(predicted, target))
-def nrmse(predicted, target):
-    ''' normalized root mean square error '''
+    rmse = np.sqrt(err[0, 0])
     return rmse(predicted, target) / np.std(target)
 
 def dissentanglement_score(z, inputs, h):

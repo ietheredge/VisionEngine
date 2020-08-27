@@ -1,0 +1,98 @@
+{
+  "exp": {
+    "name": "generated_guppies"
+  },
+  "data_loader": {
+    "name": "data_loader.DataLoader",
+    "folder_loc": "VisionEngine/data_loaders/datasets",
+    
+    "dataset": "guppies",
+
+    "use_generated": true,
+    "use_real": false,
+
+    "augment": false,
+    
+    "n_samples": 10000,
+    "cache": true,
+    "shuffle": true,
+    "validation_split": 0.25
+  },
+  "model":{
+    "name": "model.VLAEModel",
+    "loadckpt": false,
+    "ckpt_path": null,
+
+    "optimizer": "adam",
+
+    "input_shape": [256,256,3],
+    "n_latents": 4,
+    "latent_size": 10,
+
+    "denoise": true,
+    "sp_ratio": 0.9,
+    "noise_ratio": 0.1,
+
+    "recon_loss_weight": 1e5,
+
+    "use_perceptual_loss": true,
+    "perceptual_loss_model": "vgg",
+    "pereceptual_loss_layers": ["block1_conv1", "block3_conv1", "block5_conv2"],
+    "perceptual_loss_layer_weights": 1e-5,
+
+    "mu_prior": 0.0,
+    "sigma_prior": 1.0,
+
+    "use_mmd": true,
+    "mmd_coef": 1,
+    "sigmas": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 5, 10, 15, 20,
+      25, 30, 35, 100, 1e3, 1e4, 1e5, 1e6],
+
+    "use_kl": false,
+    "kl_coef": 8.0,
+
+    "kernel_l2_regularize": 2.5e-5,
+    "kernel_rnorm_init": 2e-2,
+
+    "se_layer_size": [64, 128, 256, 512]
+  },
+  "trainer":{
+    "name": "trainer.Trainer",
+    "verbose_training": true,
+    "batch_size": 16,
+
+    "num_epochs": 500,
+  
+    "use_lr_scheduler": true,
+    "lr_start": -3,
+    "lr_stop": -5,
+  
+    "min_delta": 1e-5,
+    "patience": 10,
+    "use_early_stopping": true,
+    "early_stopping_monitor": "val_loss",
+  
+    "use_kl_warmup": false,
+    "kl_wu_start": 0.0,
+    "kl_wu_stop": 1.0,
+    "kl_wu_n_cycle": 4,
+    "kl_wu_ratio": 0.5,
+    "kl_wu_n_iter": 500
+  },
+  "callbacks":{
+    "checkpoint_monitor": "val_loss",
+    "checkpoint_mode": "auto",
+    "checkpoint_save_best_only": true,
+    "checkpoint_save_weights_only": true,
+
+    "checkpoint_verbose": true,
+    "checkpoint_dir": "checkpoints",
+  
+    "save_freq": "epoch",
+
+    "tensorboard_write_graph": true,
+    "tensorboard_write_images": false,
+    "tensorboard_historgram_freq": 100,
+    "tensorboard_log_dir": "logs"
+  }
+}
