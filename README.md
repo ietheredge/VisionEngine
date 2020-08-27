@@ -15,8 +15,8 @@ $ cd VisionEngine
 ```
 
 Set up the environment: 
-- export an .env filewith the VISIONENGINE_HOME variable
-- create the conda environment
+- export an .env file
+- create a new environment
 - install the VisionEngine package in the environment
 
 ```bash
