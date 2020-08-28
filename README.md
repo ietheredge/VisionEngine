@@ -53,24 +53,6 @@ $ tensorboard --logdir logs --bind_all
 
 If you'd like to use your own data, make a custom dataloader for your dataset [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders), dataset should be placed in [this folder](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets). Consult the datasets [README](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/data_loaders/datasets/README.md). Then create a new config file and make the appropriate changes [here](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs). Finally, reinstall VisionEngine.
 
-# Citation
-
-If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:ietheredge@ab.mpg.de?subject=DHRL-VisionEngine) or [twitter](https://twitter.com/ian_etheredge) and please cite our [preprint](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1):
-
-```
-@article {etheredge2020dhrl,
-	author = {Etheredge, R. Ian and Schartl, Manfred and Jordan, Alex},
-	title = {Decontextualized learning for interpretable hierarchical representations of visual patterns},
-	elocation-id = {2020.08.25.266593},
-	year = {2020},
-	doi = {10.1101/2020.08.25.266593},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593},
-	eprint = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593.full.pdf},
-	journal = {bioRxiv}
-}
-```
-
 # Repository Structure
 
 ```bash
@@ -133,4 +115,22 @@ If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian 
 │   ├── EvolveSamples.ipynb
 │   └── FeatureAttribution.ipynb
 └── setup.py
+```
+
+# Citation
+
+If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:ietheredge@ab.mpg.de?subject=DHRL-VisionEngine) or [twitter](https://twitter.com/ian_etheredge) and please cite our [preprint](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1):
+
+```
+@article {etheredge2020dhrl,
+	author = {Etheredge, R. Ian and Schartl, Manfred and Jordan, Alex},
+	title = {Decontextualized learning for interpretable hierarchical representations of visual patterns},
+	elocation-id = {2020.08.25.266593},
+	year = {2020},
+	doi = {10.1101/2020.08.25.266593},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593},
+	eprint = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593.full.pdf},
+	journal = {bioRxiv}
+}
 ```
