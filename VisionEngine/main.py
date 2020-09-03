@@ -9,8 +9,9 @@ import tensorflow as tf
 
 
 def setup_env():
-    env_path = Path('.') / '.env'
+    env_path = Path(".") / ".env"
     load_dotenv(dotenv_path=env_path)
+
 
 def main():
 
@@ -19,33 +20,33 @@ def main():
     try:
         args = get_args()
         config = process_config(args.config)
-        
+
         # create the experiments dirs
-        create_dirs([
-            config.callbacks.tensorboard_log_dir,
-            config.callbacks.checkpoint_dir,
-            ])
+        create_dirs(
+            [
+                config.callbacks.tensorboard_log_dir,
+                config.callbacks.checkpoint_dir,
+            ]
+        )
 
-        print('Create the data generator.')
+        print("Create the data generator.")
         data_loader = factory.create(
-            "VisionEngine.data_loaders."+config.data_loader.name
-            )(config)
+            "VisionEngine.data_loaders." + config.data_loader.name
+        )(config)
 
-        print('Create the model.')
-        model = factory.create(
-            "VisionEngine.models."+config.model.name
-            )(config)
-        
+        print("Create the model.")
+        model = factory.create("VisionEngine.models." + config.model.name)(config)
+
         if config.model.loadckpt:
-            print('loading model checkpoint')
+            print("loading model checkpoint")
             model.load(config.model.ckpt_path)
 
-        print('Create the trainer')
-        trainer = factory.create(
-            "VisionEngine.trainers."+config.trainer.name
-            )(model.model, data_loader.get_train_data(), config)
+        print("Create the trainer")
+        trainer = factory.create("VisionEngine.trainers." + config.trainer.name)(
+            model.model, data_loader.get_train_data(), config
+        )
 
-        print('Start training the model.')
+        print("Start training the model.")
         trainer.train()
 
     except Exception as e:
@@ -53,6 +54,6 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup_env()
     main()

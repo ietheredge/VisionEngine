@@ -14,12 +14,15 @@ class SqueezeExciteLayer(tf.keras.layers.Layer):
         self.r = r
 
     def build(self, input_shape):
-        self.se = tf.keras.Sequential([
-            tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(self.c // self.r, use_bias=False),
-            tf.keras.layers.Activation('relu'),
-            tf.keras.layers.Dense(self.c, use_bias=False),
-            tf.keras.layers.Activation('sigmoid')])  # tanh/relu worsens performance 
+        self.se = tf.keras.Sequential(
+            [
+                tf.keras.layers.GlobalAveragePooling2D(),
+                tf.keras.layers.Dense(self.c // self.r, use_bias=False),
+                tf.keras.layers.Activation("relu"),
+                tf.keras.layers.Dense(self.c, use_bias=False),
+                tf.keras.layers.Activation("sigmoid"),
+            ]
+        )  # tanh/relu worsens performance
 
     def call(self, layer_inputs, **kwargs):
         return self.se(layer_inputs)
@@ -28,10 +31,6 @@ class SqueezeExciteLayer(tf.keras.layers.Layer):
         return input_shape
 
     def get_config(self):
-        config = {
-            'c': self.c,
-            'r': self.r
-        }
-        base_config = \
-            super(SqueezeExciteLayer, self).get_config()
+        config = {"c": self.c, "r": self.r}
+        base_config = super(SqueezeExciteLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

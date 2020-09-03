@@ -16,19 +16,16 @@ class NoiseLayer(tf.keras.layers.Layer):
     def call(self, inputs, training=None):
         def noised():
             shp = tf.keras.backend.shape(inputs)[1:]
-            mask_select = tf.keras.backend.random_binomial(
-                shape=shp, p=self.ratio)
+            mask_select = tf.keras.backend.random_binomial(shape=shp, p=self.ratio)
 
             mask_noise = tf.keras.backend.random_binomial(shape=shp, p=0.1)
             out = (inputs * (mask_select)) + mask_noise
             return out
 
-        return tf.keras.backend.in_train_phase(
-            noised, inputs, training=training)
+        return tf.keras.backend.in_train_phase(noised, inputs, training=training)
 
     def get_config(self):
-        config = {'ratio': self.ratio,
-                  'masking': self.masking}
+        config = {"ratio": self.ratio, "masking": self.masking}
         base_config = super(NoiseLayer, self).get_config()
 
         return dict(list(base_config.items()) + list(config.items()))

@@ -19,3 +19,4 @@ notebooks/.ipynb_checkpoints/
 *.jpg
 *.p
 notebooks/.ipynb_checkpoints/
+meta.yml

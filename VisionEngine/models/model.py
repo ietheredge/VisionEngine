@@ -23,7 +23,7 @@ class VLAEModel(Encoder, Decoder):
 
         Returns:
             tf.keras.Model: the compiled vlae model
-        """        
+        """
 
         def weighted_reconstruction_loss(x, xhat):
             """Weighted negative log likelihood
@@ -35,8 +35,9 @@ class VLAEModel(Encoder, Decoder):
             Returns:
                 tf.float32: weighted reconstruction loss
             """
-            return self.config.model.recon_loss_weight \
-                * tf.math.reduce_mean(tf.math.square(xhat - x))
+            return self.config.model.recon_loss_weight * tf.math.reduce_mean(
+                tf.math.square(xhat - x)
+            )
 
         # def weighted_reconstruction_loss(x, xhat):
         #     cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits=xhat, labels=x)
@@ -46,11 +47,14 @@ class VLAEModel(Encoder, Decoder):
 
         # denoise training
         if self.config.model.denoise is True:
-            with tf.name_scope('noise_layer'):
-                noise_layers = tf.keras.Sequential([
-                    NoiseLayer(),
-                    tf.keras.layers.GaussianNoise(self.config.model.noise_ratio)
-                    ], name='noise_layer')
+            with tf.name_scope("noise_layer"):
+                noise_layers = tf.keras.Sequential(
+                    [
+                        NoiseLayer(),
+                        tf.keras.layers.GaussianNoise(self.config.model.noise_ratio),
+                    ],
+                    name="noise_layer",
+                )
                 noisy_inputs = noise_layers(self.inputs)
 
             # encoded noisy samples
@@ -61,7 +65,7 @@ class VLAEModel(Encoder, Decoder):
             self.h_1, self.h_2, self.h_3, self.h_4 = self.encoder(self.inputs)
 
         # variational layers
-        with tf.name_scope('z_1'):
+        with tf.name_scope("z_1"):
             self.z_1 = VariationalLayer(
                 size=self.config.model.latent_size,
                 mu_prior=self.config.model.mu_prior,
@@ -71,9 +75,10 @@ class VLAEModel(Encoder, Decoder):
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
                 sigmas=self.config.model.sigmas,
-                name='z_1')(self.h_1)
+                name="z_1",
+            )(self.h_1)
 
-        with tf.name_scope('z_2'):
+        with tf.name_scope("z_2"):
             self.z_2 = VariationalLayer(
                 size=self.config.model.latent_size,
                 mu_prior=self.config.model.mu_prior,
@@ -83,9 +88,10 @@ class VLAEModel(Encoder, Decoder):
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
                 sigmas=self.config.model.sigmas,
-                name='z_2')(self.h_2)
+                name="z_2",
+            )(self.h_2)
 
-        with tf.name_scope('z_3'):
+        with tf.name_scope("z_3"):
             self.z_3 = VariationalLayer(
                 size=self.config.model.latent_size,
                 mu_prior=self.config.model.mu_prior,
@@ -95,9 +101,10 @@ class VLAEModel(Encoder, Decoder):
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
                 sigmas=self.config.model.sigmas,
-                name='z_3')(self.h_3)
+                name="z_3",
+            )(self.h_3)
 
-        with tf.name_scope('z_4'):
+        with tf.name_scope("z_4"):
             self.z_4 = VariationalLayer(
                 size=self.config.model.latent_size,
                 mu_prior=self.config.model.mu_prior,
@@ -107,22 +114,24 @@ class VLAEModel(Encoder, Decoder):
                 use_mmd=self.config.model.use_mmd,
                 mmd_coef=self.config.model.mmd_coef,
                 sigmas=self.config.model.sigmas,
-                name='z_4')(self.h_4)
+                name="z_4",
+            )(self.h_4)
 
         self.outputs = self.decoder([self.z_1, self.z_2, self.z_3, self.z_4])
 
         # perceptual loss layer
         if self.config.model.use_perceptual_loss is True:
-            with tf.name_scope('perceptual_loss'):
+            with tf.name_scope("perceptual_loss"):
                 (_, self.outputs) = PerceptualLossLayer(
                     perceptual_loss_model=self.config.model.perceptual_loss_model,
                     pereceptual_loss_layers=self.config.model.pereceptual_loss_layers,
                     perceptual_loss_layer_weights=self.config.model.perceptual_loss_layer_weights,
                     model_input_shape=self.config.model.input_shape,
-                    name='perceptual_loss')([self.inputs, self.outputs])
+                    name="perceptual_loss",
+                )([self.inputs, self.outputs])
 
         # define and compile the model
-        self.model = tf.keras.Model(self.inputs, self.outputs, name='vlae')
+        self.model = tf.keras.Model(self.inputs, self.outputs, name="vlae")
         self.model.summary()
 
         if self.config.model.use_kl:
@@ -130,14 +139,13 @@ class VLAEModel(Encoder, Decoder):
             #     tf.keras.optimizers.Adam(),
             #     kl_loss,
             #     metrics=[kl_loss])
-            self.model.compile(
-                tf.keras.optimizers.Adam(),
-                'mse')
+            self.model.compile(tf.keras.optimizers.Adam(), "mse")
         else:
             self.model.compile(
                 tf.keras.optimizers.Adam(),
                 weighted_reconstruction_loss,
-                metrics=[weighted_reconstruction_loss])
+                metrics=[weighted_reconstruction_loss],
+            )
 
     def load(self, checkpoint_path):
         """loads model weights from a saved checkpoint
@@ -147,7 +155,7 @@ class VLAEModel(Encoder, Decoder):
 
         Raises:
             Exception: must build model prior to loading weights
-        """        
+        """
         if self.model is None:
             raise Exception("You need to build the model first.")
 
