@@ -1,9 +1,7 @@
 # DHRL-VisionEngine
 [![Travis (.com) branch](https://img.shields.io/travis/com/ietheredge/VisionEngine/master?logo=travis)](https://travis-ci.com/ietheredge/VisionEngine)
-
-[![Latest PyPI version](https://img.shields.io/pypi/v/VisionEngine?logo=pypi)](https://pypi.org/project/VisionEngine)
-
-[![Conda (channel only)](https://img.shields.io/conda/vn/ietheredge/visionengine?label=Anaconda%20Cloud&logo=Anaconda)](https://anaconda.org/ietheredge/visionengine)
+[![Latest PyPI version](https://img.shields.io/pypi/v/VisionEngine?color=blue&logo=pypi)](https://pypi.org/project/VisionEngine)
+[![Conda (channel only)](https://img.shields.io/conda/vn/ietheredge/visionengine?color=blue&label=Anaconda%20Cloud&logo=Anaconda)](https://anaconda.org/ietheredge/visionengine)
 
 The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
 
