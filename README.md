@@ -22,7 +22,7 @@ Set up the environment:
 - create a new conda environment (will install VisionEngine and all dependencies)
 
 ```bash
-$ VISIONENGINE_HOME=$(pwd); echo VISIONENGINE_HOME = $VISIONENGINE_HOME > .env
+$ echo "VISIONENGINE_HOME = $(pwd)" >> .env
 $ conda env create -f environment.yml
 $ conda activate visionengine
 ```
