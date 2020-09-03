@@ -1,4 +1,9 @@
 # DHRL-VisionEngine
+[![Travis (.com) branch](https://img.shields.io/travis/com/ietheredge/VisionEngine/master?logo=travis)](https://travis-ci.com/ietheredge/VisionEngine)
+
+[![Latest PyPI version](https://img.shields.io/pypi/v/VisionEngine?logo=pypi)](https://pypi.org/project/VisionEngine)
+
+[![Conda (channel only)](https://img.shields.io/conda/vn/ietheredge/visionengine?label=Anaconda%20Cloud&logo=Anaconda)](https://anaconda.org/ietheredge/visionengine)
 
 The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
 
@@ -16,20 +21,18 @@ $ cd VisionEngine
 
 Set up the environment: 
 - export an .env file
-- create a new environment
-- install the VisionEngine package in the environment
+- create a new conda environment (will install VisionEngine and all dependencies)
 
 ```bash
 $ VISIONENGINE_HOME=$(pwd); echo VISIONENGINE_HOME = $VISIONENGINE_HOME > .env
 $ conda env create -f environment.yml
 $ conda activate visionengine
-$ python setup.py install
 ```
 
 # Raw data and trained models
 
 All neceassary data files and trained models can be accessed [here](https://owncloud.gwdg.de/index.php/s/u6RQq20x1MHePl3).
-*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders but you *will* need to put the downloaded model checkpoints [here](https://github.com/ietheredge/VisionEngine/tree/master/checkpoints) to verify results.
+*Note:* You do not need to download raw data for evaluation, this is done automatically by the dataloaders but you *will* need to put the downloaded model checkpoints [here](https://github.com/ietheredge/VisionEngine/tree/master/checkpoints) or modify jupyter notebooks to verify results.
 
 # Evaluation
 
@@ -37,7 +40,7 @@ We provide three notebooks to evaluate trained models, visualize feature attribu
 
 # Training a model from scratch
 
-To start training a model, use one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs): 
+To start training a model, use one of the [config files](https://github.com/ietheredge/VisionEngine/tree/master/VisionEngine/configs), e.g.: 
 
 ```bash
 $ python main.py -c configs/guppy_vae_config.json

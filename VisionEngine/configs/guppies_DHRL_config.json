@@ -21,7 +21,7 @@
   "model":{
     "name": "model.VLAEModel",
     "loadckpt": true,
-    "ckpt_path":  "/home/etheredge/Workspace/VisionEngine/checkpoints/guppy_nouveau/2020-228-16/guppy_nouveau.hdf5",
+    "ckpt_path":  "checkpoints/generated_guppies_model.hdf5",
 
     "optimizer": "adam",
 

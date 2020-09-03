@@ -7,7 +7,6 @@ VisionEngine.egg-info/
 *.pyc
 dist/
 build/
-VisionEngine/data_loaders/dataset
 report_final/
 report_final_new_gens/
 *.h5
@@ -20,3 +19,6 @@ notebooks/.ipynb_checkpoints/
 *.p
 notebooks/.ipynb_checkpoints/
 meta.yml
+bld.bat
+build.sh
+meta.yaml
