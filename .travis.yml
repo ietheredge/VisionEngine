@@ -26,3 +26,4 @@ deploy:
   edge: true
   on:
     branch: master
+  skip_existing: true
