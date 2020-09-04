@@ -4,7 +4,7 @@ python:
   - "3.7"
   - "3.8"
 before_install:
-  - VISIONENGINE_HOME=$(pwd); echo VISIONENGINE_HOME = $VISIONENGINE_HOME > .env
+  - echo "VISIONENGINE_HOME = $(pwd)" >> .env
 install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
@@ -23,7 +23,7 @@ deploy:
   username: "__token__"
   password:
     secure: "Qk4096l2WxCMPXHLREgSriWbZJBZUgRzU0qe++N47yukFVKuk/2GFAjQE6/9SCmP1OMma/uN6BxgTI4UmXM/WH+nTA2BAj3Rsgp4XWswhs0x1DD8OuDmOihawkAcve1JDjrZ9wG5+XWEf2BF9O4eY57SRS6rJsrSbgmCRxvRrHyEVXmFrYc3S7yhVvEIxe8vQ0FGzcpnGLdZGXkb7Y7X9W3TvJwqa+HAYFgSkByB4iwWPFaXTQ0ydnSVLAZDKTB1pYX3ohEDzEKEcpAdbKYG0jjXlSNx6pOcwTtuWH8Atoe9Vf2SolorS8cmPv/eu9m0eaNbd0QAEFxjPxjbvrkobIHL9Bty+tWoeJjKYlx2P053q3FW2QnMBVvIg3dI1l1Z1LJHUZMmSQ+psnL9vX8PpG7jPY0PAMUuQQ6NxhSMS8ect9npxuEKYRTLOOxqma3GIcN1V2U8TFUyiBUSIooWOGk7niY1x/eLFVlqa/Ax0P2mV+TzfFYLDSlv+d5zZ8jq9WC1IER/0hhnx06Hi5X5u4gRgsrELOXZIWMygk6GMa9zrVuo60eaHkveDQlRW5wsDumVOpymlRhApbrbc0HultOfjcdFxxwasEs7U3ZHd9mW1hiKb1HCI7QjDvvIQwb+1E4j8BxWY2KSqA+batHMQCRcqcr5LRh006z94Sc31Ds="
-  edge: true
   on:
     branch: master
+  edge: true
   skip_existing: true
