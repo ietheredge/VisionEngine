@@ -3,7 +3,7 @@
 [![Latest PyPI version](https://img.shields.io/pypi/v/VisionEngine?color=blue&logo=pypi)](https://pypi.org/project/VisionEngine)
 [![Conda (channel only)](https://img.shields.io/conda/vn/ietheredge/visionengine?color=blue&label=Anaconda%20Cloud&logo=Anaconda)](https://anaconda.org/ietheredge/visionengine)
 
-The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [10.1101/2020.08.25.266593](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1).
+The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [arXiv:2009.09893](https://arxiv.org/abs/2009.09893).
 
 ![](../assets/Overview.png?raw=true)`
 
@@ -120,18 +120,15 @@ If you'd like to use your own data, make a custom dataloader for your dataset [h
 
 # Citation
 
-If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:ietheredge@ab.mpg.de?subject=DHRL-VisionEngine) or [twitter](https://twitter.com/ian_etheredge) and please cite our [preprint](https://www.biorxiv.org/content/10.1101/2020.08.25.266593v1):
+If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:ietheredge@ab.mpg.de?subject=DHRL-VisionEngine) or on [twitter](https://twitter.com/ian_etheredge) and please cite our [preprint](https://arxiv.org/abs/2009.09893):
 
 ```
-@article {etheredge2020dhrl,
-	author = {Etheredge, R. Ian and Schartl, Manfred and Jordan, Alex},
-	title = {Decontextualized learning for interpretable hierarchical representations of visual patterns},
-	elocation-id = {2020.08.25.266593},
-	year = {2020},
-	doi = {10.1101/2020.08.25.266593},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593},
-	eprint = {https://www.biorxiv.org/content/early/2020/08/25/2020.08.25.266593.full.pdf},
-	journal = {bioRxiv}
+@misc{etheredge2020decontextualized,
+    title={Decontextualized learning for interpretable hierarchical representations of visual patterns},
+    author={R. Ian Etheredge and Manfred Schartl and Alex Jordan},
+    year={2020},
+    eprint={2009.09893},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
 }
 ```
