@@ -3,7 +3,7 @@
 [![Latest PyPI version](https://img.shields.io/pypi/v/VisionEngine?color=blue&logo=pypi)](https://pypi.org/project/VisionEngine)
 [![Conda (channel only)](https://img.shields.io/conda/vn/ietheredge/visionengine?color=blue&label=Anaconda%20Cloud&logo=Anaconda)](https://anaconda.org/ietheredge/visionengine)
 
-The repository for the framework presented in **Decontextualized learning for interpretable hierarchical representations of visual patterns** [arXiv:2009.09893](https://arxiv.org/abs/2009.09893).
+The repository for the framework presented in [**Decontextualized learning for interpretable hierarchical representations of visual patterns**](https://doi.org/10.1016/j.patter.2020.100193).
 
 ![](../assets/Overview.png?raw=true)`
 
@@ -120,7 +120,7 @@ If you'd like to use your own data, make a custom dataloader for your dataset [h
 
 # Citation
 
-If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:rianetheredge@gmail.com?subject=DHRL-VisionEngine) or on [twitter](https://twitter.com/ian_etheredge) and please cite our [paper](https://www.cell.com/patterns/pdfExtended/S2666-3899(20)30263-4):
+If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:rianetheredge@gmail.com?subject=DHRL-VisionEngine) or on [twitter](https://twitter.com/ian_etheredge) and please cite our [paper](https://doi.org/10.1016/j.patter.2020.100193):
 
 ```
 @article{ETHEREDGE2021100193,
