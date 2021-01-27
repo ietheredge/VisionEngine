@@ -120,15 +120,20 @@ If you'd like to use your own data, make a custom dataloader for your dataset [h
 
 # Citation
 
-If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:ietheredge@ab.mpg.de?subject=DHRL-VisionEngine) or on [twitter](https://twitter.com/ian_etheredge) and please cite our [preprint](https://arxiv.org/abs/2009.09893):
+If you use DHRL-VisionEngine in your own research, feel free to reachout to Ian Etheredge via [email](mailto:rianetheredge@gmail.com?subject=DHRL-VisionEngine) or on [twitter](https://twitter.com/ian_etheredge) and please cite our [paper](https://www.cell.com/patterns/pdfExtended/S2666-3899(20)30263-4):
 
 ```
-@misc{etheredge2020decontextualized,
-    title={Decontextualized learning for interpretable hierarchical representations of visual patterns},
-    author={R. Ian Etheredge and Manfred Schartl and Alex Jordan},
-    year={2020},
-    eprint={2009.09893},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
+@article{ETHEREDGE2021100193,
+title = "Decontextualized learning for interpretable hierarchical representations of visual patterns",
+journal = "Patterns",
+pages = "100193",
+year = "2021",
+issn = "2666-3899",
+doi = "https://doi.org/10.1016/j.patter.2020.100193",
+url = "http://www.sciencedirect.com/science/article/pii/S2666389920302634",
+author = "Robert Ian Etheredge and Manfred Schartl and Alex Jordan",
+keywords = "generative modeling, interpretable AI, disentangled representation learning, hierarchical features, image analysis, small data, decontextualized learning, feature attribution, latent evolution",
+abstract = "Summary
+Apart from discriminative modeling, the application of deep convolutional neural networks to basic research utilizing natural imaging data faces unique hurdles. Here, we present decontextualized hierarchical representation learning (DHRL), designed specifically to overcome these limitations. DHRL enables the broader use of small datasets, which are typical in most studies. It also captures spatial relationships between features, provides novel tools for investigating latent variables, and achieves state-of-the-art disentanglement scores on small datasets. DHRL is enabled by a novel preprocessing technique inspired by generative model chaining and an improved ladder network architecture and regularization scheme. More than an analytical tool, DHRL enables novel capabilities for virtual experiments performed directly on a latent representation, which may transform the way we perform investigations of natural image features, directly integrating analytical, empirical, and theoretical approaches."
 }
 ```
